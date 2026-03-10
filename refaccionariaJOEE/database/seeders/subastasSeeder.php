@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use App\Models\subasta;
 
 class subastasSeeder extends Seeder
 {
@@ -35,5 +36,16 @@ class subastasSeeder extends Seeder
             'estado' => 'abierta',
             'fecha_expiracion' => now()->addDays(7),
         ]);
+        $dato = new subasta();
+        $dato->user_id = 1;
+        $dato->marca_vehiculo = 'Honda';
+        $dato->modelo_vehiculo = 'Civic';
+        $dato->anio_vehiculo = '2010';
+        $dato->nombre_refaccion = 'Motor';
+        $dato->descripcion_problema = 'Motor en buen estado, con poco uso, ideal para Honda Civic 2010.';
+        $dato->urgencia = 'alta';
+        $dato->estado = 'abierta';
+        $dato->fecha_expiracion = now()->addDays(7);
+        $dato->save();
     }
 }

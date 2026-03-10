@@ -20,8 +20,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('tipo_usuario', ['taller', 'refaccionaria', 'flotilla', 'admin', 'usuario'])->default('usuario');
-            $table->string('id_fiscal')->nullable()->unique();
-            $table->string('telefono')->nullable();
+            $table->string('id_fiscal')->unique();
+            $table->string('telefono');
             $table->decimal('reputacion', 3, 2)->default(0.00);
             $table->boolean('is_premium')->default(false);
             $table->date('fecha_registro')->default(DB::raw('CURRENT_DATE'));
