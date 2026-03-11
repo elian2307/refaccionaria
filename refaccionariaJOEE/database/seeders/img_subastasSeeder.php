@@ -24,5 +24,14 @@ class img_subastasSeeder extends Seeder
             'url' => 'https://example.com/imagen2.jpg',
             
         ]);
+        $dato = new img_subasta();
+        $dato->subasta_id = 1;
+        $dato->url = 'https://example.com/imagen1.jpg';
+        $dato->save();
+
+        $dato = new img_subasta();
+        $dato->subasta_id = 2;
+        $dato->url = 'https://example.com/imagen2.jpg';
+        $dato->save();
     }
 }

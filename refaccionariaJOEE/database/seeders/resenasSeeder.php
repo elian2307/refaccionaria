@@ -31,5 +31,23 @@ class resenasSeeder extends Seeder
             'comentario' => 'Buen producto, aunque la entrega tardó un poco más de lo esperado.',
             'fecha_resena' => now(),
         ]);
+
+        $dato = new resena();
+        $dato->pedido_id = 2;
+        $dato->autor_id = 1;
+        $dato->receptor_id = 2;
+        $dato->calificacion = 5;
+        $dato->comentario = 'Excelente experiencia, producto de alta calidad y entrega rápida.';
+        $dato->fecha_resena = now();
+        $dato->save();
+
+        $dato = new resena();
+        $dato->pedido_id = 1;
+        $dato->autor_id = 2;
+        $dato->receptor_id = 1;
+        $dato->calificacion = 6;
+        $dato->comentario = 'Buen producto, aunque la entrega tardó un poco más de lo esperado.';
+        $dato->fecha_resena = now();
+        $dato->save();
     }
 }

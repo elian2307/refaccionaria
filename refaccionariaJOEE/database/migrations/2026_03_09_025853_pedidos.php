@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('monto_comision', 8, 2)->comment('Comisión del 5% al 25% para la plataforma');
             $table->enum('estado_pago', ['pendiente', 'pagado', 'reembolsado'])->default('pendiente');
             $table->enum('estado_envio', ['pendiente', 'enviado', 'entregado'])->default('pendiente');
-            $table->string('numero_rastreo')->nullable();
+            $table->string('numero_rastreo');
             $table->date('fecha_pedido')->default(DB::raw('CURRENT_DATE'));
             $table->timestamps();
         });

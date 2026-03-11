@@ -35,5 +35,27 @@ class direccionesSeeder extends Seeder
             'estado' => 'Estado Chihuahua',
         ]);
 
+        $dato = new direccion();
+        $dato->user_id = 1;
+        $dato->calle = 'Calle ignacio zaragoza';
+        $dato->numero_exterior = '123';
+        $dato->numero_interior = 'A';
+        $dato->colonia = 'Colonia Inventada';
+        $dato->municipio = 'Municipio Imaginario';
+        $dato->codigo_postal = '12345';
+        $dato->estado = 'Estado Francia';
+        $dato->save();
+
+        $dato = new direccion();
+        $dato->user_id = 2;
+        $dato->calle = 'Calle pedro infante';
+        $dato->numero_exterior = '124';
+        $dato->numero_interior = 'B';
+        $dato->colonia = 'Colonia Inovitada';
+        $dato->municipio = 'Municipio loko';
+        $dato->codigo_postal = '34567';
+        $dato->estado = 'Estado Chihuahua';
+        $dato->save();
+
     }
 }

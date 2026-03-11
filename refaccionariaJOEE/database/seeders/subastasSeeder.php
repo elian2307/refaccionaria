@@ -47,5 +47,18 @@ class subastasSeeder extends Seeder
         $dato->estado = 'abierta';
         $dato->fecha_expiracion = now()->addDays(7);
         $dato->save();
+
+        $dato = new subasta();
+        $dato->user_id = 2;
+        $dato->marca_vehiculo = 'Toyota';
+        $dato->modelo_vehiculo = 'Camry';
+        $dato->anio_vehiculo = '2022';
+        $dato->nombre_refaccion = 'Transmisión Automática';
+        $dato->descripcion_problema = 'Transmisión automática en buen estado, con poco uso, ideal para Toyota Camry 2015.';
+        $dato->urgencia = 'media';
+        $dato->estado = 'abierta';
+        $dato->fecha_expiracion = now()->addDays(7);
+        $dato->save();
     }
+
 }

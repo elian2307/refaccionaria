@@ -21,7 +21,7 @@ class pedidosSeeder extends Seeder
             'monto_comision' => 50.00,
             'estado_pago' => 'pendiente',
             'estado_envio' => 'pendiente',
-            'numero_rastreo' => null,
+            'numero_rastreo' => random_int(100000, 999999),
             'fecha_pedido' => now(),        
         ]);
          DB::table('pedidos')->insert([
@@ -31,8 +31,32 @@ class pedidosSeeder extends Seeder
             'monto_comision' => 55.00,
             'estado_pago' => 'pendiente',
             'estado_envio' => 'pendiente',
-            'numero_rastreo' => null,
+            'numero_rastreo' => random_int(100000, 999999),
             'fecha_pedido' => now(),        
         ]);
+
+        $dato = new pedido();
+        $dato->subasta_id = 1;
+        $dato->oferta_id = 1;
+        $dato->monto_total = 500.00;
+        $dato->monto_comision = 50.00;
+        $dato->estado_pago = 'pendiente';
+        $dato->estado_envio = 'pendiente';
+        $dato->numero_rastreo = random_int(100000, 999999);
+        $dato->fecha_pedido = now();
+        $dato->save();
+
+
+        $dato = new pedido();
+        $dato->subasta_id = 2; 
+        $dato->oferta_id = 2;
+        $dato->monto_total = 550.00;
+        $dato->monto_comision = 55.00;
+        $dato->estado_pago = 'pendiente';
+        $dato->estado_envio = 'pendiente';
+        $dato->numero_rastreo = random_int(100000, 999999);
+        $dato->fecha_pedido = now();
+        $dato->save();
+    
     }
 }
