@@ -7,7 +7,8 @@
         <a href="#">Repairs</a>
         <a href="#">Sale</a>
         <a href="#">Contact</a>
-        <a href="#">Log In</a>
+        <a href="/auth">Log In</a>
+        <a href="/dash">Dash</a>
     </div>
 
 </nav>
