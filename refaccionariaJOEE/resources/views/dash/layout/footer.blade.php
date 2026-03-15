@@ -1,5 +1,8 @@
 <footer>
         <span>
+            JOEE Mechanics - Easier than ever.
+        </span>
+        <span>
             English (US)
         </span>
         <div class="somedia">

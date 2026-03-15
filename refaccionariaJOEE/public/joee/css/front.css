@@ -1,3 +1,16 @@
+:root {
+    --primary: #ffc918;
+    --secondary: #fda036;
+    --bg-dark: #302723;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --text-main: #fefefe;
+    --text-lessopacityxd: #cecece;
+    --success: #39e729;
+    --pending: #ffe448;
+    --danger: #ee4343;
+    --dark: #101010;
+    --darkest: #040404;
+}
 
 *{
 margin: 0;
@@ -11,6 +24,14 @@ background: transparent;
 overflow: hidden;
 }
 
+.all{
+    background: radial-gradient(circle at top left, #1d1c1b, #1a1918);
+    color: var(--text-main);
+    height: 95vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
 
 .navbar{
 background: transparent;
@@ -105,4 +126,55 @@ cursor:pointer;
 
 .btn:hover{
 background:#d89d00;
+}
+
+
+
+
+footer{
+    background-color: var(--darkest);
+    height: 5vh;
+    display: flex;
+    align-items: center;
+    padding: 0rem 2rem;
+    justify-content: space-between;
+    color: var(--text-main);
+    font-size: 1rem;
+    font-weight: 300    ;
+}
+
+footer .somedia{
+    display: flex;
+    gap: 1rem;
+}
+
+footer .somedia a{
+    text-decoration: none;
+    color: var(--text-main);
+}
+
+
+
+
+
+
+/* Clases aca de utilidad pa no repetir weas */
+.dan{
+    color: var(--danger);
+}
+
+.sec{
+    color: var(--primary);
+    font-weight: 400;
+}
+
+.suc{
+    color: var(--success);
+    font-weight: 400;
+}
+
+.selectedf{
+    background-color: var(--primary);
+    color: var(--dark);
+    font-weight: 400;
 }

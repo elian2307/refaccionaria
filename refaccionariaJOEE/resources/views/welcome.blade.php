@@ -1,6 +1,6 @@
 @extends('front.main')
 
-@section('content')
+@section('title', 'Main') @section('content')
     <section class="mrbombastic">
 
         <h1 class="title">Refacciones disponibles</h1>
