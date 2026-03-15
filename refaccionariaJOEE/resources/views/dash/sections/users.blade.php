@@ -23,16 +23,15 @@
         <select class="sort-selects" name="sort-time" id="sort-select">
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
-            <option value="level">Level</option>
         </select>
     </div>
     <div class="sort-container">
         <h4>Level:</h4>
         <select class="sort-selects" name="sort-level" id="sort-type">
-            <option value="level">All</option>
-            <option value="newest">Only user</option>
-            <option value="oldest">Only seller</option>
-            <option value="level">Only admin</option>
+            <option value="all">All</option>
+            <option value="users">Only user</option>
+            <option value="seller">Only seller</option>
+            <option value="admin">Only admin</option>
         </select>
     </div>
     <div class="sort-container2">

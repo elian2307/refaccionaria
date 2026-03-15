@@ -1,3 +1,5 @@
+
+<!-- USERS !-->
 <div id="detailsModal" class="modal">
     <div class="modal-content">
         <h2>User Details</h2>
@@ -10,6 +12,7 @@
             <p><strong>Reputation:</strong> <span class="suc">4.5</span></p>
             <p><strong>Premium:</strong> <span class="suc">Activated</span></p>
             <p><strong>Joined at:</strong> 2026-03-12</p>
+            <p><strong>Addresses:</strong> <span class="sec" id="addresses">Show</span></p>
         </div>
         <button class="btn" onclick="closeModal('detailsModal')">Close</button>
     </div>
@@ -67,5 +70,27 @@
         </form>
         <button class="btn dan" onclick="closeModal('editModal')">Delete User</button>
         <button class="btn" onclick="closeModal('editModal')">Close</button>
+    </div>
+</div>
+
+
+
+
+<!-- OFFERS !-->
+<div id="detailsModalOffer" class="modal">
+    <div class="modal-content">
+        <h2>Offer Details</h2>
+        <div class="modal-grid">
+            <p><strong>Auction ID:</strong> 1</p>
+            <p><strong>Supplier:</strong> Maria</p>
+            <p><strong>Offer price:</strong> <span class="suc">500</span></p>
+            <p><strong>Days delivery:</strong> 14</p>
+            <p><strong>Usage:</strong> <span class="sec">New</span></p>
+            <p><strong>Guarranty months:</strong> 12</p>
+            <p><strong>Status:</strong> <span class="pen">4.5</span></p>
+            <p><strong>Offer date:</strong> 2026-03-12</p>
+        </div>
+        <button class="btn dan" onclick="closeModal('detailsModalOffer')">Delete Offer</button>
+        <button class="btn" onclick="closeModal('detailsModalOffer')">Close</button>
     </div>
 </div>

@@ -26,7 +26,7 @@
             </li>
 
             <li class="icanchangejiji" data-section="offers" data-title="Offers"
-                data-desc="Create and manage active promotions, discounts, and special pricing.">
+                data-desc="Manage active offers that users propose to active auctions.">
                 <i class="fa-solid fa-tags"></i><span>Offers</span>
             </li>
 

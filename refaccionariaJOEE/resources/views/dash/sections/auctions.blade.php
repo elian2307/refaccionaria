@@ -1,1 +1,0 @@
-<h1>Hola, este es el Dashboard</h1>
