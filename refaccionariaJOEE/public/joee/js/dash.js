@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-
+// Basura del modal
 function openModal(id) {
     document.getElementById(id).style.display = 'flex';
 }

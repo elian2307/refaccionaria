@@ -48,6 +48,21 @@
 
 <section class="users-container">
     
+    <div class="user-card premium">
+        <div class="user-header">
+            <h3>Orlando</h3>
+            <span class="sec">Admin</span>
+        </div>
+        <div class="user-body">
+            <p>Reputation: <span class="suc">4.5 ★</span></p>
+            <p>Joined: 2026-03-12</p>
+        </div>
+        <div class="user-actions">
+            <button class="btn" onclick="openModal('detailsModal')">Details</button>
+            <button class="btn" onclick="openModal('editModal')">Edit</button>
+        </div>
+    </div>
+
     <div class="user-card">
         <div class="user-header">
             <h3>Orlando</h3>
@@ -58,8 +73,38 @@
             <p>Joined: 2026-03-12</p>
         </div>
         <div class="user-actions">
-            <button class="btn-outline" onclick="openModal('detailsModal')">Details</button>
-            <button class="btn-primary" onclick="openModal('editModal')">Edit</button>
+            <button class="btn" onclick="openModal('detailsModal')">Details</button>
+            <button class="btn" onclick="openModal('editModal')">Edit</button>
+        </div>
+    </div>
+
+    <div class="user-card">
+        <div class="user-header">
+            <h3>Orlando</h3>
+            <span class="sec">Admin</span>
+        </div>
+        <div class="user-body">
+            <p>Reputation: <span class="suc">4.5 ★</span></p>
+            <p>Joined: 2026-03-12</p>
+        </div>
+        <div class="user-actions">
+            <button class="btn" onclick="openModal('detailsModal')">Details</button>
+            <button class="btn" onclick="openModal('editModal')">Edit</button>
+        </div>
+    </div>
+
+    <div class="user-card">
+        <div class="user-header">
+            <h3>Orlando</h3>
+            <span class="sec">Admin</span>
+        </div>
+        <div class="user-body">
+            <p>Reputation: <span class="suc">4.5 ★</span></p>
+            <p>Joined: 2026-03-12</p>
+        </div>
+        <div class="user-actions">
+            <button class="btn" onclick="openModal('detailsModal')">Details</button>
+            <button class="btn" onclick="openModal('editModal')">Edit</button>
         </div>
     </div>
 </section>
