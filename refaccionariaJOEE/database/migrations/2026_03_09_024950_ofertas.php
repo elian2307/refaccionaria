@@ -21,7 +21,7 @@ return new class extends Migration
             $table->enum('condicion_pieza', ['nueva', 'usada', 'reconstruida'])->default('nueva');
             $table->integer('meses_garantia')->unsigned()->default(0);
             $table->boolean('es_aceptada')->default(false);
-            $table->date('fecha_oferta')->default(DB::raw('CURRENT_DATE'));
+            $table->timestamp('fecha_oferta')->useCurrent();
             $table->timestamps();
         });
     }

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->enum('estado_pago', ['pendiente', 'pagado', 'reembolsado'])->default('pendiente');
             $table->enum('estado_envio', ['pendiente', 'enviado', 'entregado'])->default('pendiente');
             $table->string('numero_rastreo');
-            $table->date('fecha_pedido')->default(DB::raw('CURRENT_DATE'));
+            $table->timestamp('fecha_pedido')->useCurrent();
             $table->timestamps();
         });
     }

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('receptor_id')->references('id')->on('users');
             $table->integer('calificacion')->comment('Calificación del 1 al 5');
             $table->text('comentario')->nullable();
-            $table->date('fecha_resena')->default(DB::raw('CURRENT_DATE'));
+            $table->timestamp('fecha_resena')->useCurrent();
             $table->timestamps();
         });
     }

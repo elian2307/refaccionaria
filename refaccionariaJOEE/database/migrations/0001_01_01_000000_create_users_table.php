@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('telefono');
             $table->decimal('reputacion', 3, 2)->default(0.00);
             $table->boolean('is_premium')->default(false);
-            $table->date('fecha_registro')->default(DB::raw('CURRENT_DATE'));
+            $table->timestamp('fecha_registro')->useCurrent();
             $table->rememberToken();
             $table->timestamps();
         });
