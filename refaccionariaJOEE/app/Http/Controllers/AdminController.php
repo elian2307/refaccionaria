@@ -77,12 +77,31 @@ class AdminController extends Controller
 
         $user->save();
 
-        return response()->json(['success' => true, 'message' => 'User updated successfully!']);
+        return response()->json([
+            'success' => true, 
+            'message' => 'User updated successfully!']);
 
     } catch (\Exception $e) {
         return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
     }
     }
+    public function deleteUser($id) {
+    try {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User deleted successfully'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
 
 
 }

@@ -47,7 +47,7 @@
 
 <section class="users-container">
         @foreach($users as $user)
-            <div class="user-card">
+            <div class="user-card {{ $user->is_premium ? 'premium' : '' }}">
                 <div class="user-header">
                     <h3>{{ $user->nombre }}</h3>
                     <span class="sec">{{ ucfirst($user->tipo_usuario) }}</span>
@@ -149,6 +149,15 @@
 
                     <button class="btn dan" onclick="openModal('deleteModal_{{ $user->id }}')">Delete User</button>
                     <button class="btn" onclick="closeModal('editModal_{{ $user->id }}')">Close</button>
+                </div>
+            </div>
+
+            <div id="deleteModal_{{ $user->id }}" class="modal" style="display:none;">
+                <div class="modal-content">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete {{ $user->nombre }}?</p>
+                    <button class="btn dan" onclick="deleteUser({{ $user->id }})">Yes, Delete</button>
+                    <button class="btn" onclick="closeModal('deleteModal_{{ $user->id }}')">Cancel</button>
                 </div>
             </div>
 
