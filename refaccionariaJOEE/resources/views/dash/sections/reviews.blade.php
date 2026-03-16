@@ -3,15 +3,15 @@
 <section class="stats-grid">
     <div class="card">
         <h3>Total Reviews</h3>
-        <p class="value">3631</p>
+        <p class="value">{{ $reviews->count() }}</p>
     </div>
     <div class="card">
         <h3>Good Reviews</h3>
-        <p class="value">1456</p>
+        <p class="value">{{ $reviews->where('calificacion', '>=', 4)->count() }}</p>
     </div>
     <div class="card">
         <h3>Bad Reviews</h3>
-        <p class="value">446</p>
+        <p class="value">{{ $reviews->where('calificacion', '<', 4)->count() }}</p>
     </div>
 </section>
 
@@ -37,24 +37,31 @@
 <h3>Results</h3>
 
 <section class="review-container">
-    
-    <div class="review-card">
-        <div class="review-header">
-            <h3>Review #(ID)</h3>
-            <p>Rating:<span class="sec"> 6 ★</span></p>
-        </div>
-        <div class="review-body">
-            <p>From: <b>Orlando</b></p>
-            <p>To: <b>Maria</b></p>
-            <p>Date: 2026-03-12</p>
-            <p>Order: <span style="cursor:pointer;" class="suc" onclick="openModal('detailsModalOrder')">See</span></p>
-            <p class="yousaidsmt">Buen producto, aunque la entrega tardó un poco más de lo esperado.</p>
+    @foreach ($reviews as $review)
+        <div class="review-card">
+            <div class="review-header">
+                <h3>Review #{{ $review->id }}</h3>
+                <p>Rating:<span class="sec"> {{ $review->calificacion }} ★</span></p>
+            </div>
+            <div class="review-body">
+            <p>From: <b>{{ $review->autor->nombre ?? 'Unknown' }}</b></p>
+            <p>To: <b>{{ $review->receptor->nombre ?? 'Unknown' }}</b></p>
+            <p>Order: <b>{{ $review->pedido->numero_rastreo ?? $review->pedido_id }}</b></p>
+            <p>Date: {{ $review->created_at }}</p>
+            <p class="yousaidsmt">{{ $review->comentario }}</p>
         </div>
         <div class="review-actions">
-            <button class="btn dan" onclick="openModal('detailsModalYS')">Delete</button>
+            <button class="btn dan" onclick="openModal('detailsModalYS{{ $review->id }}')">Delete</button>
         </div>
     </div>
+     <div id="detailsModalYS{{ $review->id }}" class="modal">
+    <div class="modal-content">
+        <h2>Are you sure?</h2>
+        <button class="btn" onclick="closeModal('detailsModalYS{{ $review->id }}')">Cancel</button>
+        <button class="btn dan" onclick="deleteReview({{ $review->id }})">Yes</button>
+        <button class="btn" onclick="closeModal('detailsModalYS{{ $review->id }}')">Close</button>
+    </div>
+</div>
+    @endforeach
 
 </section>
-
-

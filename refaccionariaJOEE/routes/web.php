@@ -41,3 +41,9 @@ Route::get('/dash/reviews', [AdminController::class, 'reviews']);
 Route::get('/dash/settings', [AdminController::class, 'settings']);
 
 Route::post('/dash/users/update/{id}', [AdminController::class, 'updateUser'])->name('users.update');
+Route::delete('/dash/users/delete/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
+
+Route::post('/dash/orders/update/{id}', [AdminController::class, 'updateOrder'])->name('orders.update');
+Route::delete('/dash/orders/delete/{id}', [AdminController::class, 'deleteOrder'])->name('orders.delete');
+
+Route::delete('/dash/reviews/delete/{id}', [AdminController::class, 'deleteReview'])->name('reviews.delete');

@@ -14,8 +14,8 @@ return new class extends Migration
     {
         Schema::create('ofertas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subasta_id')->references('id')->on('subastas');
-            $table->foreignId('proveedor_id')->references('id')->on('users');
+            $table->foreignId('subasta_id')->references('id')->on('subastas')->onDelete('cascade');
+            $table->foreignId('proveedor_id')->references('id')->on('users')->onDelete('cascade');
             $table->decimal('precio_ofertado', 8, 2);
             $table->integer('dias_entrega')->unsigned();
             $table->enum('condicion_pieza', ['nueva', 'usada', 'reconstruida'])->default('nueva');

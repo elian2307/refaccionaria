@@ -16,4 +16,16 @@ class resena extends Model
         'comentario',
         'fecha_resena',
     ];
+
+    public function autor() {
+        return $this->belongsTo(User::class, 'autor_id');
+    }
+
+    public function receptor() {
+        return $this->belongsTo(User::class, 'receptor_id');
+    }
+
+    public function pedido() {
+        return $this->belongsTo(pedido::class, 'pedido_id');
+    }
 }

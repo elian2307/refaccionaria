@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\pedido;
+use App\Models\resena;
 use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
@@ -33,7 +35,7 @@ class AdminController extends Controller
     }
 
     public function orders() {
-    return $this->renderView('orders');
+    return $this->renderView('orders', ['orders' => pedido::all()]);
     }
 
     public function offers() {
@@ -45,7 +47,7 @@ class AdminController extends Controller
     }
 
     public function reviews() {
-    return $this->renderView('reviews');
+    return $this->renderView('reviews', ['reviews' => resena::all()]);
     }
 
     public function settings() {
@@ -104,4 +106,66 @@ class AdminController extends Controller
 }
 
 
+    public function updateOrder(Request $request, $id) {
+    try {
+        $order = pedido::findOrFail($id);
+
+        $validated = $request->validate([
+            'estado_pago' => 'required|in:pendiente,pagado,reembolsado',
+            'estado_envio' => 'required|in:pendiente,enviado,entregado',
+            'numero_rastreo' => 'nullable|string|max:255',
+        ]);
+
+        $order->estado_pago = $request->estado_pago;
+        $order->estado_envio = $request->estado_envio;
+        if ($request->has('numero_rastreo')) {
+            $order->numero_rastreo = $request->numero_rastreo;
+        }
+
+        $order->save();
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Order updated successfully!']);
+
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+    }
+
+    public function deleteOrder($id) {
+    try {
+        $order = pedido::findOrFail($id);
+        $order->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order deleted successfully'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+    }
+
+    public function deleteReview($id) {
+    try {
+        $review = resena::findOrFail($id);
+        $review->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Review deleted successfully'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+    }
 }

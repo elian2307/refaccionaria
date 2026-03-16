@@ -14,9 +14,9 @@ return new class extends Migration
     {
         Schema::create('resenas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pedido_id')->references('id')->on('pedidos');
-            $table->foreignId('autor_id')->references('id')->on('users');
-            $table->foreignId('receptor_id')->references('id')->on('users');
+            $table->foreignId('pedido_id')->references('id')->on('pedidos')->onDelete('cascade');
+            $table->foreignId('autor_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('receptor_id')->references('id')->on('users')->onDelete('cascade');
             $table->integer('calificacion')->comment('Calificación del 1 al 5');
             $table->text('comentario')->nullable();
             $table->timestamp('fecha_resena')->useCurrent();

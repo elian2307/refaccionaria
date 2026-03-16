@@ -14,8 +14,8 @@ return new class extends Migration
     {
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subasta_id')->references('id')->on('subastas');
-            $table->foreignId('oferta_id')->references('id')->on('ofertas');
+            $table->foreignId('subasta_id')->references('id')->on('subastas')->onDelete('cascade');
+            $table->foreignId('oferta_id')->references('id')->on('ofertas')->onDelete('cascade');
             $table->decimal('monto_total', 8, 2);
             $table->decimal('monto_comision', 8, 2)->comment('Comisión del 5% al 25% para la plataforma');
             $table->enum('estado_pago', ['pendiente', 'pagado', 'reembolsado'])->default('pendiente');

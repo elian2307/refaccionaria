@@ -61,17 +61,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const gohomeBut = document.getElementById('gohome')
     gohomeBut.addEventListener('click', function (e) {
-            e.preventDefault();
-            window.location.href = '/';
+        e.preventDefault();
+        window.location.href = '/';
     });
 
     const logoutBut = document.getElementById('logout')
     logoutBut.addEventListener('click', function (e) {
-            e.preventDefault();
-            window.location.href = '/logout';
-            document.getElementById('logout-form').submit();
+        e.preventDefault();
+        window.location.href = '/logout';
+        document.getElementById('logout-form').submit();
     });
-    
+
 });
 
 
@@ -103,7 +103,7 @@ function openModal(id) {
 
     zIndexCounter++;
     modal.style.zIndex = zIndexCounter;
-    
+
     modal.style.display = 'flex';
 }
 
@@ -112,7 +112,7 @@ function closeModal(id) {
 }
 
 // Cerrar si hacen clic fuera del modal
-window.onclick = function(event) {
+window.onclick = function (event) {
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
     }
@@ -121,12 +121,12 @@ window.onclick = function(event) {
 
 
 // comprobar la actualizacion del usario
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     if (e.target && e.target.classList.contains('btn-save-user')) {
-        
+
         const userId = e.target.getAttribute('data-id');
         const form = document.getElementById(`formEdit_${userId}`);
-        const formData = new FormData(form); 
+        const formData = new FormData(form);
 
         fetch(`/dash/users/update/${userId}`, {
             method: 'POST',
@@ -136,19 +136,127 @@ document.addEventListener('click', function(e) {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             }
         })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('¡Usuario actualizado con éxito!');
+                    closeModal(`editModal_${userId}`);
+                    document.querySelector('[data-section="users"]').click();
+                } else {
+                    alert('Error al actualizar: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                alert('Algo salió mal con el servidor.');
+            });
+    }
+});
+
+// comprobar la eliminacion del usario
+function deleteUser(id) {
+    fetch(`/dash/users/delete/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        }
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('¡Usuario actualizado con éxito!');
-                closeModal(`editModal_${userId}`);
+                alert('¡Usuario eliminado con éxito!');
+                closeModal(`deleteModal_${id}`);
                 document.querySelector('[data-section="users"]').click();
             } else {
-                alert('Error al actualizar: ' + data.message);
+                alert('Error al eliminar: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error en la petición:', error);
             alert('Algo salió mal con el servidor.');
         });
+}
+
+// comprobar la eliminacion de la resena
+function deleteReview(id) {
+    fetch(`/dash/reviews/delete/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('¡Reseña eliminada con éxito!');
+                closeModal(`detailsModalYS${id}`);
+                document.querySelector('[data-section="reviews"]').click();
+            } else {
+                alert('Error al eliminar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error en la petición:', error);
+            alert('Algo salió mal con el servidor.');
+        });
+}
+
+// comprobar la actualizacion de la orden
+document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('btn-save-order')) {
+
+        const orderId = e.target.getAttribute('data-id');
+        const form = document.getElementById(`formEditOrder_${orderId}`);
+        const formData = new FormData(form);
+
+        fetch(`/dash/orders/update/${orderId}`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('¡Orden actualizada con éxito!');
+                    closeModal(`editModalOrder_${orderId}`);
+                    document.querySelector('[data-section="orders"]').click();
+                } else {
+                    alert('Error al actualizar: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                alert('Algo salió mal con el servidor.');
+            });
     }
 });
+
+// comprobar la eliminacion de la orden
+function deleteOrder(id) {
+    fetch(`/dash/orders/delete/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('¡Orden eliminada con éxito!');
+                closeModal(`deleteModalOrder_${id}`);
+                document.querySelector('[data-section="orders"]').click();
+            } else {
+                alert('Error al eliminar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error en la petición:', error);
+            alert('Algo salió mal con el servidor.');
+        });
+}
