@@ -39,3 +39,5 @@ Route::get('/dash/offers', [AdminController::class, 'offers']);
 Route::get('/dash/auctions', [AdminController::class, 'auctions']);
 Route::get('/dash/reviews', [AdminController::class, 'reviews']);
 Route::get('/dash/settings', [AdminController::class, 'settings']);
+
+Route::post('/dash/users/update/{id}', [AdminController::class, 'updateUser'])->name('users.update');

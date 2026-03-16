@@ -117,3 +117,38 @@ window.onclick = function(event) {
         event.target.style.display = 'none';
     }
 }
+
+
+
+// comprobar la actualizacion del usario
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('btn-save-user')) {
+        
+        const userId = e.target.getAttribute('data-id');
+        const form = document.getElementById(`formEdit_${userId}`);
+        const formData = new FormData(form); 
+
+        fetch(`/dash/users/update/${userId}`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('¡Usuario actualizado con éxito!');
+                closeModal(`editModal_${userId}`);
+                document.querySelector('[data-section="users"]').click();
+            } else {
+                alert('Error al actualizar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error en la petición:', error);
+            alert('Algo salió mal con el servidor.');
+        });
+    }
+});
