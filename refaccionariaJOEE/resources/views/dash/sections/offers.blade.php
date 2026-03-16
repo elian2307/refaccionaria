@@ -38,7 +38,7 @@
         <h4>Search</h4>
         <div class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" name="" id="" placeholder="Search someone">
+            <input type="text" name="" id="" placeholder="Search something">
         </div>
     </div>
 </div>
@@ -49,7 +49,7 @@
     
     <div class="offer-card">
         <div class="offer-header">
-            <h3>Auction 1</h3>
+            <h3>Auction 1 - Offer 1</h3>
             <span class="sec">Pending</span>
         </div>
         <div class="offer-body">

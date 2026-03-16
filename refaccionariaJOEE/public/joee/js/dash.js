@@ -96,8 +96,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // Basura del modal
+let zIndexCounter = 1000;
+
 function openModal(id) {
-    document.getElementById(id).style.display = 'flex';
+    const modal = document.getElementById(id);
+
+    zIndexCounter++;
+    modal.style.zIndex = zIndexCounter;
+    
+    modal.style.display = 'flex';
 }
 
 function closeModal(id) {

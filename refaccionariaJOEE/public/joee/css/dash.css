@@ -333,7 +333,10 @@ header p{
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 .users-container,
-.offer-container{
+.offer-container,
+.auction-container,
+.order-container,
+.review-container{
     width: 100%;
     display: grid;
     grid-template-columns: repeat(2, 1fr); 
@@ -341,7 +344,10 @@ header p{
 }
 
 .user-card,
-.offer-card{
+.offer-card,
+.auction-card,
+.order-card,
+.review-card{
     background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
@@ -354,16 +360,37 @@ header p{
 }
 
 .user-header, 
-.offer-header {
+.offer-header, 
+.auction-header,
+.order-header,
+.review-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .user-actions,
-.offer-actions {
+.offer-actions,
+.auction-actions,
+.order-actions,
+.review-actions {
     display: flex;
     gap: 1rem;
+}
+
+
+.autismo{
+    display: flex;
+}
+
+.auctionleft,
+.auctionright{
+    width: 50%;
+    overflow: hidden;
+}
+
+.auctionright img{
+    width: 15rem;
 }
 
 .btn{
@@ -382,6 +409,11 @@ header p{
 .btn:hover{
     background: var(--primary);
     color: var(--dark);
+}
+
+.yousaidsmt{
+    color: var(--text-main);
+    font-size: 1.2rem;
 }
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 
@@ -633,6 +665,11 @@ footer .somedia a{
 
 .pen{
     color: var(--pending);
+    font-weight: 400;
+}
+
+.fin{
+    color: var(--text-lessopacityxd);
     font-weight: 400;
 }
 
