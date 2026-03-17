@@ -15,42 +15,57 @@
                 <i class="fa-solid fa-chart-line"></i><span>Statics</span>
             </li>
 
-            <li class="icanchangejiji" data-section="users" data-title="Users"
-                data-desc="Manage registered users, levels, and administrative access.">
-                <i class="fa-solid fa-users"></i><span>Users</span>
-            </li>
+            @if(auth()->user()->rol === 'admin')
+                <li class="icanchangejiji" data-section="users" data-title="Users"
+                    data-desc="Manage registered users, levels, and administrative access.">
+                    <i class="fa-solid fa-users"></i><span>Users</span>
+                </li>
+            @endif
 
-            <li class="icanchangejiji" data-section="orders" data-title="Orders"
-                data-desc="Track, update, and process incoming orders.">
-                <i class="fa-solid fa-box-open"></i><span>Orders</span>
-            </li>
+            @if(in_array(auth()->user()->rol, ['admin', 'vendedor', 'comprador']))
+                <li class="icanchangejiji" data-section="orders" data-title="Orders"
+                    data-desc="Track, update, and process incoming orders.">
+                    <i class="fa-solid fa-box-open"></i><span>Orders</span>
+                </li>
+            @endif
 
-            <li class="icanchangejiji" data-section="offers" data-title="Offers"
-                data-desc="Manage active offers that users propose to active auctions.">
-                <i class="fa-solid fa-tags"></i><span>Offers</span>
-            </li>
+            @if(in_array(auth()->user()->rol, ['admin', 'comprador']))
+                <li class="icanchangejiji" data-section="offers" data-title="Offers"
+                    data-desc="Manage active offers that users propose to active auctions.">
+                    <i class="fa-solid fa-tags"></i><span>Offers</span>
+                </li>
+            @endif
 
-            <li class="icanchangejiji" data-section="auctions" data-title="Auctions"
-                data-desc="Manage every auction in timeline.">
-                <i class="fa-solid fa-gavel"></i><span>Auctions</span>
-            </li>
+            @if(in_array(auth()->user()->rol, ['admin', 'vendedor']))
+                <li class="icanchangejiji" data-section="auctions" data-title="Auctions"
+                    data-desc="Manage every auction in timeline.">
+                    <i class="fa-solid fa-gavel"></i><span>Auctions</span>
+                </li>
+            @endif
 
-            <li class="icanchangejiji" data-section="reviews" data-title="Reviews"
-                data-desc="Moderation center for feedback and product ratings.">
-                <i class="fa-solid fa-bullhorn"></i><span>Reviews</span>
-            </li>
+            @if(in_array(auth()->user()->rol, ['admin', 'vendedor', 'comprador']))
+                <li class="icanchangejiji" data-section="reviews" data-title="Reviews"
+                    data-desc="Moderation center for feedback and product ratings.">
+                    <i class="fa-solid fa-bullhorn"></i><span>Reviews</span>
+                </li>
+            @endif
 
-            <li class="icanchangejiji" data-section="settings" data-title="Settings"
-                data-desc="Configure system preferences, profile details, and application settings.">
-                <i class="fa-solid fa-gear"></i><span>Settings</span>
-            </li>
+            @if(auth()->user()->rol === 'admin')
+                <li class="icanchangejiji" data-section="settings" data-title="Settings"
+                    data-desc="Configure system preferences, profile details, and application settings.">
+                    <i class="fa-solid fa-gear"></i><span>Settings</span>
+                </li>
+            @endif
         </ul>
         <ul>
             <li id="gohome"><i class="fa-solid fa-house"></i><span>Home</span></li>
             
-            <li id="logout" class="dan"><i class="fa-solid fa-right-from-bracket"></i><span>Log out</span>
-                <form id="logout-form" action="/logout" method="POST" style="display: none;">
+            <li class="dan">
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="margin: 0;">
                     @csrf
+                    <button type="submit" style="all: unset; display: flex; align-items: center; gap: 8px; width: 100%; cursor: pointer;">
+                        <i class="fa-solid fa-right-from-bracket"></i><span>Log out</span>
+                    </button>
                 </form>
             </li>
         </ul>

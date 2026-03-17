@@ -13,6 +13,7 @@ class subasta extends Model
         'marca_vehiculo',
         'modelo_vehiculo',
         'anio_vehiculo',
+        'nombre_refaccion',
         'descripcion_problema',
         'urgencia',
         'estado',

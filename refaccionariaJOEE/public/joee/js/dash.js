@@ -65,13 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.href = '/';
     });
 
-    const logoutBut = document.getElementById('logout')
-    logoutBut.addEventListener('click', function (e) {
-        e.preventDefault();
-        window.location.href = '/logout';
-        document.getElementById('logout-form').submit();
-    });
-
+    
 });
 
 
@@ -259,4 +253,282 @@ function deleteOrder(id) {
             console.error('Error en la petición:', error);
             alert('Algo salió mal con el servidor.');
         });
+}
+function showOfferValidationErrors(containerId, errors) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    let html = '';
+    Object.keys(errors).forEach(function (key) {
+        errors[key].forEach(function (message) {
+            html += `<p style="color: red; margin: 4px 0;">${message}</p>`;
+        });
+    });
+
+    container.innerHTML = html;
+}
+
+function createOffer() {
+    const form = document.getElementById('formCreateOffer');
+    const formData = new FormData(form);
+
+    document.getElementById('offerErrors').innerHTML = '';
+
+    fetch('/dash/offers/store', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+        .then(async response => {
+            const data = await response.json();
+
+            if (response.status === 422) {
+                showOfferValidationErrors('offerErrors', data.errors);
+                return;
+            }
+
+            if (data.success) {
+                showToast('¡Oferta creada con éxito!', 'success');
+                document.querySelector('[data-section="offers"]').click();
+            } else {
+                showToast('Error al crear: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error en la petición:', error);
+            showToast('Algo salió mal con el servidor.', 'error');
+        });
+}
+
+document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('btn-save-offer')) {
+        const offerId = e.target.getAttribute('data-id');
+        const form = document.getElementById(`formEditOffer_${offerId}`);
+        const formData = new FormData(form);
+
+        document.getElementById(`offerEditErrors_${offerId}`).innerHTML = '';
+
+        fetch(`/dash/offers/update/${offerId}`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+            .then(async response => {
+                const data = await response.json();
+
+                if (response.status === 422) {
+                    showOfferValidationErrors(`offerEditErrors_${offerId}`, data.errors);
+                    return;
+                }
+
+                if (data.success) {
+                    showToast('¡Oferta actualizada con éxito!', 'success');
+                    closeModal(`detailsModalOffer${offerId}`);
+                    document.querySelector('[data-section="offers"]').click();
+                } else {
+                    showToast('Error al actualizar: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                alert('Algo salió mal con el servidor.');
+            });
+    }
+});
+
+function deleteOffer(id) {
+    showConfirmModal('Are you sure you want to delete this offer?', function () {
+        fetch(`/dash/offers/delete/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('¡Oferta eliminada con éxito!', 'success');
+                    closeModal(`detailsModalOffer${id}`);
+                    document.querySelector('[data-section="offers"]').click();
+                } else {
+                    showToast('Error al eliminar: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                showToast('Algo salió mal con el servidor.', 'error');
+            });
+    }, 'Delete offer');
+}
+function showToast(message, type = 'success', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `custom-toast ${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(30px)';
+
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, duration);
+}
+
+function showConfirmModal(message, onConfirm, title = 'Confirm action') {
+    const modal = document.getElementById('customConfirmModal');
+    const titleEl = document.getElementById('confirmTitle');
+    const messageEl = document.getElementById('confirmMessage');
+    const okBtn = document.getElementById('confirmOkBtn');
+    const cancelBtn = document.getElementById('confirmCancelBtn');
+
+    if (!modal || !titleEl || !messageEl || !okBtn || !cancelBtn) return;
+
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+
+    const newOkBtn = okBtn.cloneNode(true);
+    okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+    openModal('customConfirmModal');
+
+    newCancelBtn.addEventListener('click', function () {
+        closeModal('customConfirmModal');
+    });
+
+    newOkBtn.addEventListener('click', function () {
+        closeModal('customConfirmModal');
+        if (typeof onConfirm === 'function') {
+            onConfirm();
+        }
+    });
+}
+function showAuctionValidationErrors(containerId, errors) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    let html = '';
+    Object.keys(errors).forEach(function (key) {
+        errors[key].forEach(function (message) {
+            html += `<p style="color: red; margin: 4px 0;">${message}</p>`;
+        });
+    });
+
+    container.innerHTML = html;
+}
+
+function createAuction() {
+    const form = document.getElementById('formCreateAuction');
+    const formData = new FormData(form);
+
+    document.getElementById('auctionErrors').innerHTML = '';
+
+    fetch('/dash/auctions/store', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+        .then(async response => {
+            const data = await response.json();
+
+            if (response.status === 422) {
+                showAuctionValidationErrors('auctionErrors', data.errors);
+                return;
+            }
+
+            if (data.success) {
+                showToast('¡Subasta creada con éxito!', 'success');
+                document.querySelector('[data-section="auctions"]').click();
+            } else {
+                showToast('Error al crear: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error en la petición:', error);
+            showToast('Algo salió mal con el servidor.', 'error');
+        });
+}
+
+document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('btn-save-auction')) {
+        const auctionId = e.target.getAttribute('data-id');
+        const form = document.getElementById(`formEditAuction_${auctionId}`);
+        const formData = new FormData(form);
+
+        document.getElementById(`auctionEditErrors_${auctionId}`).innerHTML = '';
+
+        fetch(`/dash/auctions/update/${auctionId}`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+            .then(async response => {
+                const data = await response.json();
+
+                if (response.status === 422) {
+                    showAuctionValidationErrors(`auctionEditErrors_${auctionId}`, data.errors);
+                    return;
+                }
+
+                if (data.success) {
+                    showToast('¡Subasta actualizada con éxito!', 'success');
+                    closeModal(`detailsModalAuction${auctionId}`);
+                    document.querySelector('[data-section="auctions"]').click();
+                } else {
+                    showToast('Error al actualizar: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                showToast('Algo salió mal con el servidor.', 'error');
+            });
+    }
+});
+
+function deleteAuction(id) {
+    showConfirmModal('Are you sure you want to delete this auction?', function () {
+        fetch(`/dash/auctions/delete/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('¡Subasta eliminada con éxito!', 'success');
+                    closeModal(`detailsModalAuction${id}`);
+                    document.querySelector('[data-section="auctions"]').click();
+                } else {
+                    showToast('Error al eliminar: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                showToast('Algo salió mal con el servidor.', 'error');
+            });
+    }, 'Delete auction');
 }

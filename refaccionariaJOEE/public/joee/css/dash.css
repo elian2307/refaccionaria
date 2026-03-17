@@ -685,7 +685,67 @@ footer .somedia a{
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
 
+.custom-toast {
+    min-width: 280px;
+    max-width: 380px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    color: #fff;
+    font-weight: 500;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    animation: slideInToast 0.25s ease;
+    opacity: 0.98;
+}
+
+.custom-toast.success {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.custom-toast.error {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.custom-toast.info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+@keyframes slideInToast {
+    from {
+        transform: translateX(40px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 0.98;
+    }
+}
+
+.confirm-modal-content {
+    max-width: 420px;
+    text-align: center;
+}
+
+.confirm-modal-content p {
+    margin: 1rem 0 1.5rem;
+    color: #666;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
 
 
 
