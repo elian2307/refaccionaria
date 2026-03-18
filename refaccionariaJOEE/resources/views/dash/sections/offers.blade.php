@@ -15,80 +15,82 @@
     </div>
 </section>
 
-<h3>Create offer</h3>
+@if(in_array(auth()->user()->rol, ['admin', 'comprador']))
+    <h3>Create offer</h3>
 
-<div class="filters">
-    <form id="formCreateOffer" style="width: 100%;">
-        @csrf
+    <div class="filters">
+        <form id="formCreateOffer" style="width: 100%;">
+            @csrf
 
-        <div class="filters">
-            <div class="sort-container">
-                <h4>Auction:</h4>
-                <select class="sort-selects" name="subasta_id" required>
-                    <option value="">Select auction</option>
-                    @foreach ($auctions as $auction)
-                        <option value="{{ $auction->id }}">
-                            #{{ $auction->id }} - {{ $auction->marca_vehiculo }} {{ $auction->modelo_vehiculo }}
-                        </option>
-                    @endforeach
-                </select>
+            <div class="filters">
+                <div class="sort-container">
+                    <h4>Auction:</h4>
+                    <select class="sort-selects" name="subasta_id" required>
+                        <option value="">Select auction</option>
+                        @foreach ($auctions as $auction)
+                            <option value="{{ $auction->id }}">
+                                #{{ $auction->id }} - {{ $auction->marca_vehiculo }} {{ $auction->modelo_vehiculo }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Provider:</h4>
+                    <select class="sort-selects" name="proveedor_id" required>
+                        <option value="">Select provider</option>
+                        @foreach ($users as $user)
+                            <option value="{{ $user->id }}">
+                                #{{ $user->id }} - {{ $user->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Price:</h4>
+                    <input class="sort-selects" type="number" step="0.01" min="0" name="precio_ofertado" required>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Days:</h4>
+                    <input class="sort-selects" type="number" min="0" name="dias_entrega" required>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Condition:</h4>
+                    <select class="sort-selects" name="condicion_pieza" required>
+                        <option value="nueva">Nueva</option>
+                        <option value="usada">Usada</option>
+                        <option value="reconstruida">Reconstruida</option>
+                    </select>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Warranty:</h4>
+                    <input class="sort-selects" type="number" min="0" name="meses_garantia" required>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Accepted:</h4>
+                    <select class="sort-selects" name="es_aceptada" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Date:</h4>
+                    <input class="sort-selects" type="date" name="fecha_oferta" required>
+                </div>
             </div>
 
-            <div class="sort-container">
-                <h4>Provider:</h4>
-                <select class="sort-selects" name="proveedor_id" required>
-                    <option value="">Select provider</option>
-                    @foreach ($users as $user)
-                        <option value="{{ $user->id }}">
-                            #{{ $user->id }} - {{ $user->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+            <div id="offerErrors" style="margin: 1rem 0;"></div>
 
-            <div class="sort-container">
-                <h4>Price:</h4>
-                <input class="sort-selects" type="number" step="0.01" min="0" name="precio_ofertado" required>
-            </div>
-
-            <div class="sort-container">
-                <h4>Days:</h4>
-                <input class="sort-selects" type="number" min="0" name="dias_entrega" required>
-            </div>
-
-            <div class="sort-container">
-                <h4>Condition:</h4>
-                <select class="sort-selects" name="condicion_pieza" required>
-                    <option value="nueva">Nueva</option>
-                    <option value="usada">Usada</option>
-                    <option value="reconstruida">Reconstruida</option>
-                </select>
-            </div>
-
-            <div class="sort-container">
-                <h4>Warranty:</h4>
-                <input class="sort-selects" type="number" min="0" name="meses_garantia" required>
-            </div>
-
-            <div class="sort-container">
-                <h4>Accepted:</h4>
-                <select class="sort-selects" name="es_aceptada" required>
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
-
-            <div class="sort-container">
-                <h4>Date:</h4>
-                <input class="sort-selects" type="date" name="fecha_oferta" required>
-            </div>
-        </div>
-
-        <div id="offerErrors" style="margin: 1rem 0;"></div>
-
-        <button type="button" class="btn" onclick="createOffer()">Create offer</button>
-    </form>
-</div>
+            <button type="button" class="btn" onclick="createOffer()">Create offer</button>
+        </form>
+    </div>
+@endif
 
 <h3>Results</h3>
 
@@ -189,12 +191,31 @@
 
                     <div id="offerEditErrors_{{ $offer->id }}" style="margin: 1rem 0;"></div>
 
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-save-offer" data-id="{{ $offer->id }}">Save changes</button>
-                        <button type="button" class="btn dan" onclick="deleteOffer({{ $offer->id }})">Delete</button>
-                    </div>
+                    @if(in_array(auth()->user()->rol, ['admin', 'comprador']))
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-save-offer" data-id="{{ $offer->id }}">Save changes</button>
+                            <button type="button" class="btn dan" onclick="openModal('deleteModalOffer{{ $offer->id }}')">Delete</button>
+                        </div>
+                    @endif
                 </form>
             </div>
         </div>
+
+        @if(in_array(auth()->user()->rol, ['admin', 'comprador']))
+            <div id="deleteModalOffer{{ $offer->id }}" class="modal">
+                <div class="modal-content">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete Offer {{ $offer->id }}?</p>
+
+                    <button class="btn dan" onclick="deleteOffer({{ $offer->id }})">
+                        Yes, Delete
+                    </button>
+
+                    <button class="btn" onclick="closeModal('deleteModalOffer{{ $offer->id }}')">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        @endif
     @endforeach
 </section>

@@ -67,7 +67,10 @@
             </div>
             <div class="order-actions">
                 <button class="btn" onclick="openModal('detailsModalOrder_{{ $order->id }}')">Details</button>
-                <button class="btn" onclick="openModal('editModalOrder_{{ $order->id }}')">Edit</button>
+
+                @if(in_array(auth()->user()->rol, ['admin', 'vendedor']))
+                    <button class="btn" onclick="openModal('editModalOrder_{{ $order->id }}')">Edit</button>
+                @endif
             </div>
         </div>
 
@@ -87,51 +90,60 @@
             </div>
         </div>
 
-        <div id="editModalOrder_{{ $order->id }}" class="modal" style="display:none;">
-            <div class="modal-content">
-                <h2>Edit Order</h2>
-                <form class="edit-order-form" id="formEditOrder_{{ $order->id }}">
-                    <div class="form-group">
-                        <label>Tracking Number</label>
-                        <input type="text" name="numero_rastreo" value="{{ $order->numero_rastreo }}" class="edit-input">
-                    </div>
+        @if(in_array(auth()->user()->rol, ['admin', 'vendedor']))
+            <div id="editModalOrder_{{ $order->id }}" class="modal" style="display:none;">
+                <div class="modal-content">
+                    <h2>Edit Order</h2>
+                    <form class="edit-order-form" id="formEditOrder_{{ $order->id }}">
+                        <div class="form-group">
+                            <label>Tracking Number</label>
+                            <input type="text" name="numero_rastreo" value="{{ $order->numero_rastreo }}" class="edit-input">
+                        </div>
 
-                    <div class="form-group">
-                        <label>Payment Status</label>
-                        <select name="estado_pago" class="edit-input eis">
-                            <option value="pendiente" {{ $order->estado_pago == 'pendiente' ? 'selected' : '' }}>Pending</option>
-                            <option value="pagado" {{ $order->estado_pago == 'pagado' ? 'selected' : '' }}>Paid</option>
-                            <option value="reembolsado" {{ $order->estado_pago == 'reembolsado' ? 'selected' : '' }}>Refunded</option>
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label>Payment Status</label>
+                            <select name="estado_pago" class="edit-input eis">
+                                <option value="pendiente" {{ $order->estado_pago == 'pendiente' ? 'selected' : '' }}>Pending</option>
+                                <option value="pagado" {{ $order->estado_pago == 'pagado' ? 'selected' : '' }}>Paid</option>
+                                <option value="reembolsado" {{ $order->estado_pago == 'reembolsado' ? 'selected' : '' }}>Refunded</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label>Shipping Status</label>
-                        <select name="estado_envio" class="edit-input eis">
-                            <option value="pendiente" {{ $order->estado_envio == 'pendiente' ? 'selected' : '' }}>Pending</option>
-                            <option value="enviado" {{ $order->estado_envio == 'enviado' ? 'selected' : '' }}>Shipped</option>
-                            <option value="entregado" {{ $order->estado_envio == 'entregado' ? 'selected' : '' }}>Delivered</option>
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label>Shipping Status</label>
+                            <select name="estado_envio" class="edit-input eis">
+                                <option value="pendiente" {{ $order->estado_envio == 'pendiente' ? 'selected' : '' }}>Pending</option>
+                                <option value="enviado" {{ $order->estado_envio == 'enviado' ? 'selected' : '' }}>Shipped</option>
+                                <option value="entregado" {{ $order->estado_envio == 'entregado' ? 'selected' : '' }}>Delivered</option>
+                            </select>
+                        </div>
 
-                    <button type="button" class="btn btn-save-order" data-id="{{ $order->id }}">
-                        Save Changes
-                    </button>
-                </form>
+                        <div id="orderEditErrors_{{ $order->id }}" style="margin: 1rem 0;"></div>
 
-                <button class="btn dan" onclick="openModal('deleteModalOrder_{{ $order->id }}')">Delete Order</button>
-                <button class="btn" onclick="closeModal('editModalOrder_{{ $order->id }}')">Close</button>
+                        <button type="button" class="btn btn-save-order" data-id="{{ $order->id }}">
+                            Save Changes
+                        </button>
+                    </form>
+
+                    @if(auth()->user()->rol === 'admin')
+                        <button class="btn dan" onclick="openModal('deleteModalOrder_{{ $order->id }}')">Delete Order</button>
+                    @endif
+
+                    <button class="btn" onclick="closeModal('editModalOrder_{{ $order->id }}')">Close</button>
+                </div>
             </div>
-        </div>
+        @endif
 
-        <div id="deleteModalOrder_{{ $order->id }}" class="modal" style="display:none;">
-            <div class="modal-content">
-                <h2>Confirm Deletion</h2>
-                <p>Are you sure you want to delete Order {{ $order->id }}?</p>
-                <button class="btn dan" onclick="deleteOrder({{ $order->id }})">Yes, Delete</button>
-                <button class="btn" onclick="closeModal('deleteModalOrder_{{ $order->id }}')">Cancel</button>
+        @if(auth()->user()->rol === 'admin')
+            <div id="deleteModalOrder_{{ $order->id }}" class="modal" style="display:none;">
+                <div class="modal-content">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete Order {{ $order->id }}?</p>
+                    <button class="btn dan" onclick="deleteOrder({{ $order->id }})">Yes, Delete</button>
+                    <button class="btn" onclick="closeModal('deleteModalOrder_{{ $order->id }}')">Cancel</button>
+                </div>
             </div>
-        </div>
+        @endif
     @endforeach
 
 </section>

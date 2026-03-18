@@ -15,80 +15,82 @@
     </div>
 </section>
 
-<h3>Create auction</h3>
+@if(in_array(auth()->user()->rol, ['admin', 'vendedor']))
+    <h3>Create auction</h3>
 
-<div class="filters">
-    <form id="formCreateAuction" style="width: 100%;">
-        @csrf
+    <div class="filters">
+        <form id="formCreateAuction" style="width: 100%;">
+            @csrf
 
-        <div class="filters">
-            <div class="sort-container">
-                <h4>User:</h4>
-                <select class="sort-selects" name="user_id" required>
-                    <option value="">Select user</option>
-                    @foreach ($users as $user)
-                        <option value="{{ $user->id }}">
-                            #{{ $user->id }} - {{ $user->nombre }}
-                        </option>
-                    @endforeach
-                </select>
+            <div class="filters">
+                <div class="sort-container">
+                    <h4>User:</h4>
+                    <select class="sort-selects" name="user_id" required>
+                        <option value="">Select user</option>
+                        @foreach ($users as $user)
+                            <option value="{{ $user->id }}">
+                                #{{ $user->id }} - {{ $user->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Brand:</h4>
+                    <input class="sort-selects" type="text" name="marca_vehiculo" required>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Model:</h4>
+                    <input class="sort-selects" type="text" name="modelo_vehiculo" required>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Year:</h4>
+                    <input class="sort-selects" type="text" name="anio_vehiculo" required>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Part name:</h4>
+                    <input class="sort-selects" type="text" name="nombre_refaccion" required>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Priority:</h4>
+                    <select class="sort-selects" name="urgencia" required>
+                        <option value="baja">Low</option>
+                        <option value="media">Medium</option>
+                        <option value="alta">High</option>
+                    </select>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Status:</h4>
+                    <select class="sort-selects" name="estado" required>
+                        <option value="abierta">Open</option>
+                        <option value="cerrada">Closed</option>
+                        <option value="cancelada">Cancelled</option>
+                        <option value="finalizada">Completed</option>
+                    </select>
+                </div>
+
+                <div class="sort-container">
+                    <h4>Expiration date:</h4>
+                    <input class="sort-selects" type="date" name="fecha_expiracion">
+                </div>
             </div>
 
-            <div class="sort-container">
-                <h4>Brand:</h4>
-                <input class="sort-selects" type="text" name="marca_vehiculo" required>
+            <div style="margin-top: 1rem;">
+                <h4>Description:</h4>
+                <textarea class="sort-selects" name="descripcion_problema" rows="4" style="width: 100%;" required></textarea>
             </div>
 
-            <div class="sort-container">
-                <h4>Model:</h4>
-                <input class="sort-selects" type="text" name="modelo_vehiculo" required>
-            </div>
+            <div id="auctionErrors" style="margin: 1rem 0;"></div>
 
-            <div class="sort-container">
-                <h4>Year:</h4>
-                <input class="sort-selects" type="text" name="anio_vehiculo" required>
-            </div>
-
-            <div class="sort-container">
-                <h4>Part name:</h4>
-                <input class="sort-selects" type="text" name="nombre_refaccion" required>
-            </div>
-
-            <div class="sort-container">
-                <h4>Priority:</h4>
-                <select class="sort-selects" name="urgencia" required>
-                    <option value="baja">Low</option>
-                    <option value="media">Medium</option>
-                    <option value="alta">High</option>
-                </select>
-            </div>
-
-            <div class="sort-container">
-                <h4>Status:</h4>
-                <select class="sort-selects" name="estado" required>
-                    <option value="abierta">Open</option>
-                    <option value="cerrada">Closed</option>
-                    <option value="cancelada">Cancelled</option>
-                    <option value="finalizada">Completed</option>
-                </select>
-            </div>
-
-            <div class="sort-container">
-                <h4>Expiration date:</h4>
-                <input class="sort-selects" type="date" name="fecha_expiracion">
-            </div>
-        </div>
-
-        <div style="margin-top: 1rem;">
-            <h4>Description:</h4>
-            <textarea class="sort-selects" name="descripcion_problema" rows="4" style="width: 100%;" required></textarea>
-        </div>
-
-        <div id="auctionErrors" style="margin: 1rem 0;"></div>
-
-        <button type="button" class="btn" onclick="createAuction()">Create auction</button>
-    </form>
-</div>
+            <button type="button" class="btn" onclick="createAuction()">Create auction</button>
+        </form>
+    </div>
+@endif
 
 <h3>Results</h3>
 
@@ -196,12 +198,30 @@
 
                     <div id="auctionEditErrors_{{ $auction->id }}" style="margin: 1rem 0;"></div>
 
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-save-auction" data-id="{{ $auction->id }}">Save changes</button>
-                        <button type="button" class="btn dan" onclick="deleteAuction({{ $auction->id }})">Delete</button>
-                    </div>
+                    @if(in_array(auth()->user()->rol, ['admin', 'vendedor']))
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-save-auction" data-id="{{ $auction->id }}">Save changes</button>
+                            <button type="button" class="btn dan" onclick="openModal('deleteModalAuction{{ $auction->id }}')">Delete</button>
+                        </div>
+                    @endif
                 </form>
             </div>
         </div>
+        @if(in_array(auth()->user()->rol, ['admin', 'vendedor']))
+            <div id="deleteModalAuction{{ $auction->id }}" class="modal">
+                <div class="modal-content">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete Auction {{ $auction->id }}?</p>
+
+                    <button class="btn dan" onclick="deleteAuction({{ $auction->id }})">
+                        Yes, Delete
+                    </button>
+
+                    <button class="btn" onclick="closeModal('deleteModalAuction{{ $auction->id }}')">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        @endif
     @endforeach
 </section>

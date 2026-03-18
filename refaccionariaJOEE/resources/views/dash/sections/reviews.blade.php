@@ -44,24 +44,30 @@
                 <p>Rating:<span class="sec"> {{ $review->calificacion }} ★</span></p>
             </div>
             <div class="review-body">
-            <p>From: <b>{{ $review->autor->nombre ?? 'Unknown' }}</b></p>
-            <p>To: <b>{{ $review->receptor->nombre ?? 'Unknown' }}</b></p>
-            <p>Order: <b>{{ $review->pedido->numero_rastreo ?? $review->pedido_id }}</b></p>
-            <p>Date: {{ $review->created_at }}</p>
-            <p class="yousaidsmt">{{ $review->comentario }}</p>
+                <p>From: <b>{{ $review->autor->nombre ?? 'Unknown' }}</b></p>
+                <p>To: <b>{{ $review->receptor->nombre ?? 'Unknown' }}</b></p>
+                <p>Order: <b>{{ $review->pedido->numero_rastreo ?? $review->pedido_id }}</b></p>
+                <p>Date: {{ $review->created_at }}</p>
+                <p class="yousaidsmt">{{ $review->comentario }}</p>
+            </div>
+
+            @if(auth()->user()->rol === 'admin')
+                <div class="review-actions">
+                    <button class="btn dan" onclick="openModal('detailsModalYS{{ $review->id }}')">Delete</button>
+                </div>
+            @endif
         </div>
-        <div class="review-actions">
-            <button class="btn dan" onclick="openModal('detailsModalYS{{ $review->id }}')">Delete</button>
-        </div>
-    </div>
-     <div id="detailsModalYS{{ $review->id }}" class="modal">
-    <div class="modal-content">
-        <h2>Are you sure?</h2>
-        <button class="btn" onclick="closeModal('detailsModalYS{{ $review->id }}')">Cancel</button>
-        <button class="btn dan" onclick="deleteReview({{ $review->id }})">Yes</button>
-        <button class="btn" onclick="closeModal('detailsModalYS{{ $review->id }}')">Close</button>
-    </div>
-</div>
+
+        @if(auth()->user()->rol === 'admin')
+            <div id="detailsModalYS{{ $review->id }}" class="modal">
+                <div class="modal-content">
+                    <h2>Are you sure?</h2>
+                    <button class="btn" onclick="closeModal('detailsModalYS{{ $review->id }}')">Cancel</button>
+                    <button class="btn dan" onclick="deleteReview({{ $review->id }})">Yes</button>
+                    <button class="btn" onclick="closeModal('detailsModalYS{{ $review->id }}')">Close</button>
+                </div>
+            </div>
+        @endif
     @endforeach
 
 </section>
