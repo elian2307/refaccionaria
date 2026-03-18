@@ -19,4 +19,9 @@ class subasta extends Model
         'estado',
         'fecha_expiracion',
     ];
+
+    public function img_subastas()
+    {
+        return $this->hasMany(img_subasta::class, 'subasta_id');
+    }
 }

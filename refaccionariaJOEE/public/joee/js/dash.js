@@ -19,12 +19,16 @@ document.addEventListener('DOMContentLoaded', function () {
             // Cambiar titulo de la pa pagina
             const title = this.getAttribute('data-title');
 
+            // Obtener el icono del menu
+            const iconElement = this.querySelector('i');
+            const iconHTML = iconElement ? `<i class="${iconElement.className}"></i> ` : '';
+
             if (title) {
                 document.title = `${title} | JOEE Mechanics`;
 
                 // Cambiar el H1 de cada opcion elegida
                 if (maintitle) {
-                    maintitle.innerText = `${title}`;
+                    maintitle.innerHTML = `${iconHTML}${title}`;
                 }
             }
 
@@ -65,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.href = '/';
     });
 
-    
+
 });
 
 

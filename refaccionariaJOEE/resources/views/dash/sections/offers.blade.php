@@ -2,15 +2,15 @@
 
 <section class="stats-grid">
     <div class="card">
-        <h3>Active Offers</h3>
+        <h3><i class="fa-solid fa-tags"></i> Active Offers</h3>
         <p class="value">{{ $offers->count() }}</p>
     </div>
     <div class="card">
-        <h3>Declined Offers</h3>
+        <h3><i class="fa-solid fa-thumbs-down"></i> Declined Offers</h3>
         <p class="value">{{ $offers->where('es_aceptada', 0)->count() }}</p>
     </div>
     <div class="card">
-        <h3>Accepted Offers</h3>
+        <h3><i class="fa-solid fa-thumbs-up"></i> Accepted Offers</h3>
         <p class="value">{{ $offers->where('es_aceptada', 1)->count() }}</p>
     </div>
 </section>
@@ -103,8 +103,14 @@
 
         <div class="offer-card">
             <div class="offer-header">
-                <h3>Auction {{ $offer->subasta_id }} - Offer {{ $offer->id }}</h3>
-                <span class="sec">{{ $offer->es_aceptada ? 'Accepted' : 'Pending' }}</span>
+                <h3><i class="fa-solid fa-gavel"></i> Auction {{ $offer->subasta_id }} - Offer {{ $offer->id }}</h3>
+                <span class=@if($offer->es_aceptada == 1) 'suc' @else 'sec' @endif>
+                    @if($offer->es_aceptada == 1)
+                        <i class="fa-solid fa-check"></i>
+                    @else
+                        <i class="fa-regular fa-clock"></i>
+                    @endif
+                    {{ $offer->es_aceptada ? 'Accepted' : 'Pending' }}</span>
             </div>
             <div class="offer-body">
                 <p>Provider: <b>{{ $provider->nombre ?? 'N/A' }}</b></p>

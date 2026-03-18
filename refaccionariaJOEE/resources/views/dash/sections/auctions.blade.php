@@ -2,16 +2,20 @@
 
 <section class="stats-grid">
     <div class="card">
-        <h3>Active Auctions</h3>
+        <h3><i class="fa-solid fa-gavel"></i> Active Auctions</h3>
         <p class="value">{{ $auctions->where('estado', 'abierta')->count() }}</p>
     </div>
     <div class="card">
-        <h3>Completed Auctions</h3>
+        <h3><i class="fa-solid fa-flag-checkered"></i> Completed Auctions</h3>
         <p class="value">{{ $auctions->where('estado', 'finalizada')->count() }}</p>
     </div>
     <div class="card">
-        <h3>Cancelled Auctions</h3>
+        <h3><i class="fa-solid fa-xmark"></i> Cancelled Auctions</h3>
         <p class="value">{{ $auctions->where('estado', 'cancelada')->count() }}</p>
+    </div>
+    <div class="card">
+        <h3><i class="fa-solid fa-lock"></i> Closed Auctions</h3>
+        <p class="value">{{ $auctions->where('estado', 'cerrada')->count() }}</p>
     </div>
 </section>
 
@@ -82,7 +86,7 @@
 
             <div style="margin-top: 1rem;">
                 <h4>Description:</h4>
-                <textarea class="sort-selects" name="descripcion_problema" rows="4" style="width: 100%;" required></textarea>
+                <textarea class="ta" name="descripcion_problema" rows="4" style="width: 100%;" required></textarea>
             </div>
 
             <div id="auctionErrors" style="margin: 1rem 0;"></div>
@@ -104,7 +108,7 @@
             <div class="autismo">
                 <div class="auctionleft">
                     <div class="auction-header">
-                        <h3>{{ $auction->marca_vehiculo }} {{ $auction->modelo_vehiculo }} {{ $auction->anio_vehiculo }}</h3>
+                        <h3><i class="fa-solid fa-car"></i> {{ $auction->marca_vehiculo }} {{ $auction->modelo_vehiculo }} {{ $auction->anio_vehiculo }}</h3>
                     </div>
                     <div class="auction-body">
                         <p>Piece: <b>{{ $auction->nombre_refaccion }}</b></p>
@@ -112,14 +116,23 @@
                         <p>Priority: <b>{{ ucfirst($auction->urgencia) }}</b></p>
                         <p>Expiration date: {{ $auction->fecha_expiracion ?? 'N/A' }}</p>
                         <p>Status:
-                            <span class="suc">
+                            <span class=@if($auction->estado == 'abierta') 'suc' @elseif($auction->estado == 'cerrada') 'dan' @elseif($auction->estado == 'cancelada') 'pen' @elseif($auction->estado == 'finalizada') 'fin' @endif>
+                                @if($auction->estado == 'abierta')
+                                    <i class="fa-solid fa-check"></i>
+                                @elseif($auction->estado == 'cerrada')
+                                    <i class="fa-regular fa-clock"></i>
+                                @elseif($auction->estado == 'cancelada')
+                                    <i class="fa-solid fa-xmark"></i>
+                                @elseif($auction->estado == 'finalizada')
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                @endif
                                 <b>{{ ucfirst($auction->estado) }}</b>
                             </span>
                         </p>
                     </div>
                 </div>
                 <div class="auctionright">
-                    <img src="{{ asset('/joee/img/default.jpg') }}" alt="">
+                    <img src="{{ optional($auction->img_subastas->first())->url ?? asset('/joee/img/default.jpg') }}" alt="">
                 </div>
             </div>
 
@@ -169,7 +182,7 @@
 
                     <div class="form-group">
                         <label>Description</label>
-                        <textarea name="descripcion_problema" class="edit-input" rows="4" required>{{ $auction->descripcion_problema }}</textarea>
+                        <textarea name="descripcion_problema" class="ta" rows="4" required>{{ $auction->descripcion_problema }}</textarea>
                     </div>
 
                     <div class="form-group">

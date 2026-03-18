@@ -29,7 +29,7 @@ class pedidosSeeder extends Seeder
             'oferta_id' => 2,
             'monto_total' => 550.00,
             'monto_comision' => 55.00,
-            'estado_pago' => 'pendiente',
+            'estado_pago' => 'pagado',
             'estado_envio' => 'pendiente',
             'numero_rastreo' => random_int(100000, 999999),
             'fecha_pedido' => now(),        
@@ -40,7 +40,7 @@ class pedidosSeeder extends Seeder
         $dato->oferta_id = 1;
         $dato->monto_total = 500.00;
         $dato->monto_comision = 50.00;
-        $dato->estado_pago = 'pendiente';
+        $dato->estado_pago = 'reembolsado';
         $dato->estado_envio = 'pendiente';
         $dato->numero_rastreo = random_int(100000, 999999);
         $dato->fecha_pedido = now();

@@ -2,16 +2,16 @@
 
 <section class="stats-grid">
     <div class="card">
-        <h3>Total Users</h3>
-        <p class="value">241</p>
+        <h3><i class="fa-solid fa-users"></i> Total Users</h3>
+        <p class="value">{{ $users->count() }}</p>
     </div>
     <div class="card">
-        <h3>Total Sellers</h3>
-        <p class="value">12</p>
+        <h3><i class="fa-solid fa-store"></i> Total Sellers</h3>
+        <p class="value">{{ $users->where('rol', 'vendedor')->count() }}</p>
     </div>
     <div class="card">
-        <h3>Total Adminstrators</h3>
-        <p class="value">2</p>
+        <h3><i class="fa-solid fa-user-shield"></i> Total Adminstrators</h3>
+        <p class="value">{{ $users->where('rol', 'admin')->count() }}</p>
     </div>
 </section>
 
@@ -49,7 +49,7 @@
     @foreach($users as $user)
         <div class="user-card {{ $user->is_premium ? 'premium' : '' }}">
             <div class="user-header">
-                <h3>{{ $user->nombre }}</h3>
+                <h3><i class="fa-solid fa-user"></i>  {{ $user->nombre }}</h3>
                 <span class="sec">{{ ucfirst($user->tipo_usuario) }}</span>
             </div>
             <div class="user-body">
@@ -155,7 +155,11 @@
                     </button>
                 </form>
 
-                <button class="btn dan" onclick="openModal('deleteModal_{{ $user->id }}')">Delete User</button>
+                @if(auth()->user()->id !== $user->id)
+                    <button class="btn dan" onclick="openModal('deleteModal_{{ $user->id }}')">Delete User</button>
+                @else
+                    <button class="btn dan" disabled style="opacity: 0.5; cursor: not-allowed;" title="You cannot delete yourself">Delete User</button>
+                @endif
                 <button class="btn" onclick="closeModal('editModal_{{ $user->id }}')">Close</button>
             </div>
         </div>

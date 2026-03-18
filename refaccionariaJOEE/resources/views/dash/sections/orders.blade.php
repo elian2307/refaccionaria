@@ -2,16 +2,20 @@
 
 <section class="stats-grid">
     <div class="card">
-        <h3>Active Orders</h3>
+        <h3><i class="fa-solid fa-ticket"></i> Active Orders</h3>
         <p class="value">{{ $orders->count() }}</p>
     </div>
     <div class="card">
-        <h3>Paid Orders</h3>
+        <h3><i class="fa-solid fa-sack-dollar"></i> Paid Orders</h3>
         <p class="value">{{ $orders->where('estado_pago', 'pagado')->count() }}</p>
     </div>
     <div class="card">
-        <h3>Refunded Orders</h3>
+        <h3><i class="fa-solid fa-money-bill-transfer"></i> Refunded Orders</h3>
         <p class="value">{{ $orders->where('estado_pago', 'reembolsado')->count() }}</p>
+    </div>
+    <div class="card">
+        <h3><i class="fa-regular fa-clock"></i> Pending Orders</h3>
+        <p class="value">{{ $orders->where('estado_pago', 'pendiente')->count() }}</p>
     </div>
 </section>
 
@@ -55,11 +59,23 @@
 <h3>Results</h3>
 
 <section class="order-container">
-    @foreach($orders as $order)
-        <div class="order-card">
+    @auth
+        @foreach($orders as $order)
+            <div class="order-card">
             <div class="order-header">
-                <h3>Order {{ $order->id }} ({{ $order->numero_rastreo ?? 'No tracking' }})</h3>
-                <span class="sec">{{ ucfirst($order->estado_pago) }}</span>
+                <h3>
+                <i class="fa-solid fa-ticket"></i>
+                    Order {{ $order->id }} ({{ $order->numero_rastreo ?? 'No tracking' }})</h3>
+
+                <span class=@if($order->estado_pago == 'pendiente') 'sec' @elseif($order->estado_pago == 'pagado') 'suc' @elseif($order->estado_pago == 'reembolsado') 'dan' @endif>
+                    @if($order->estado_pago == 'pendiente')
+                        <i class="fa-regular fa-clock"></i>
+                    @elseif($order->estado_pago == 'pagado')
+                        <i class="fa-solid fa-sack-dollar"></i>
+                    @elseif($order->estado_pago == 'reembolsado')
+                        <i class="fa-solid fa-money-bill-transfer"></i>
+                    @endif  
+                    {{ ucfirst($order->estado_pago) }}</span>
             </div>
             <div class="order-body">
                 <p>Offer price: <b>${{ number_format($order->monto_total, 2) }}</b></p>
@@ -103,7 +119,8 @@
                         <div class="form-group">
                             <label>Payment Status</label>
                             <select name="estado_pago" class="edit-input eis">
-                                <option value="pendiente" {{ $order->estado_pago == 'pendiente' ? 'selected' : '' }}>Pending</option>
+                                <option value="pendiente" {{ $order->estado_pago == 'pendiente' ? 'selected' : '' }}>
+                                    Pending</option>
                                 <option value="pagado" {{ $order->estado_pago == 'pagado' ? 'selected' : '' }}>Paid</option>
                                 <option value="reembolsado" {{ $order->estado_pago == 'reembolsado' ? 'selected' : '' }}>Refunded</option>
                             </select>
@@ -145,5 +162,6 @@
             </div>
         @endif
     @endforeach
+    @endauth
 
 </section>

@@ -37,7 +37,17 @@ class AdminController extends Controller
     }
 
     public function orders() {
-    return $this->renderView('orders', ['orders' => pedido::all()]);
+        $user = auth()->user();
+        if ($user->rol === 'admin') {
+            $orders = pedido::all();
+        } else {
+            $subastaIds = subasta::where('user_id', $user->id)->pluck('id');
+            $ofertaIds = oferta::where('proveedor_id', $user->id)->pluck('id');
+            $orders = pedido::whereIn('subasta_id', $subastaIds)
+                            ->orWhereIn('oferta_id', $ofertaIds)
+                            ->get();
+        }
+        return $this->renderView('orders', ['orders' => $orders]);
     }
 
     public function offers() {

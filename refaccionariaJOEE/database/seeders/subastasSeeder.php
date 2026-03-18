@@ -33,7 +33,7 @@ class subastasSeeder extends Seeder
             'nombre_refaccion' => 'Transmisión Automática',
             'descripcion_problema' => 'Transmisión automática en buen estado, con poco uso, ideal para Toyota Camry 2015.',
             'urgencia' => 'media',
-            'estado' => 'abierta',
+            'estado' => 'cerrada',
             'fecha_expiracion' => now()->addDays(7),
         ]);
         $dato = new subasta();
@@ -41,22 +41,22 @@ class subastasSeeder extends Seeder
         $dato->marca_vehiculo = 'Honda';
         $dato->modelo_vehiculo = 'Civic';
         $dato->anio_vehiculo = '2010';
-        $dato->nombre_refaccion = 'Motor';
-        $dato->descripcion_problema = 'Motor en buen estado, con poco uso, ideal para Honda Civic 2010.';
+        $dato->nombre_refaccion = 'Volante';
+        $dato->descripcion_problema = 'Volante en buen estado, con poco uso, ideal para Honda Civic 2010.';
         $dato->urgencia = 'alta';
-        $dato->estado = 'abierta';
+        $dato->estado = 'finalizada';
         $dato->fecha_expiracion = now()->addDays(7);
         $dato->save();
 
         $dato = new subasta();
         $dato->user_id = 2;
         $dato->marca_vehiculo = 'Toyota';
-        $dato->modelo_vehiculo = 'Camry';
+        $dato->modelo_vehiculo = 'Tacoma';
         $dato->anio_vehiculo = '2022';
-        $dato->nombre_refaccion = 'Transmisión Automática';
-        $dato->descripcion_problema = 'Transmisión automática en buen estado, con poco uso, ideal para Toyota Camry 2015.';
+        $dato->nombre_refaccion = 'Amortiguador';
+        $dato->descripcion_problema = 'Amortiguador en buen estado, con poco uso, ideal para Toyota Tacoma 2022.';
         $dato->urgencia = 'media';
-        $dato->estado = 'abierta';
+        $dato->estado = 'cancelada';
         $dato->fecha_expiracion = now()->addDays(7);
         $dato->save();
     }
