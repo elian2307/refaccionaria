@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\oferta;
 
 class OfertasController extends Controller
 {
@@ -12,7 +13,13 @@ class OfertasController extends Controller
      */
     public function index()
     {
-        //
+        $ofertas = oferta::all();
+
+        return response([
+            'success' => true,
+            'message' => $ofertas->isEmpty() ? 'No ofertas found' : 'Ofertas retrieved successfully',
+            'ofertas' => $ofertas
+        ], 200);
     }
 
     /**
@@ -20,7 +27,10 @@ class OfertasController extends Controller
      */
     public function create()
     {
-        //
+        return response([
+            'success' => true,
+            'msg' => 'Form for creating oferta (API usually does not need this)'
+        ], 200);
     }
 
     /**
@@ -28,7 +38,24 @@ class OfertasController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validateData = $request->validate([
+            'subasta_id' => 'required|exists:subastas,id',
+            'proveedor_id' => 'required|exists:users,id',
+            'precio_ofertado' => 'required|numeric',
+            'dias_entrega' => 'required|integer',
+            'condicion_pieza' => 'required|string|max:255',
+            'meses_garantia' => 'nullable|integer',
+            'es_aceptada' => 'nullable|boolean',
+            'fecha_oferta' => 'required|date',
+        ]);
+
+        $oferta = oferta::create($validateData);
+
+        return response([
+            'success' => true,
+            'msg' => 'Oferta created successfully',
+            'oferta' => $oferta
+        ], 201);
     }
 
     /**
@@ -36,7 +63,19 @@ class OfertasController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $oferta = oferta::find($id);
+
+        if (!$oferta) {
+            return response([
+                'success' => false,
+                'msg' => 'Oferta not found'
+            ], 404);
+        }
+
+        return response([
+            'success' => true,
+            'oferta' => $oferta
+        ], 200);
     }
 
     /**
@@ -44,7 +83,20 @@ class OfertasController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $oferta = oferta::find($id);
+
+        if (!$oferta) {
+            return response([
+                'success' => false,
+                'msg' => 'Oferta not found'
+            ], 404);
+        }
+
+        return response([
+            'success' => true,
+            'msg' => 'Form for editing oferta (API usually does not need this)',
+            'oferta' => $oferta
+        ], 200);
     }
 
     /**
@@ -52,7 +104,33 @@ class OfertasController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $oferta = oferta::find($id);
+
+        if (!$oferta) {
+            return response([
+                'success' => false,
+                'msg' => 'Oferta not found'
+            ], 404);
+        }
+
+        $validateData = $request->validate([
+            'subasta_id' => 'sometimes|required|exists:subastas,id',
+            'proveedor_id' => 'sometimes|required|exists:users,id',
+            'precio_ofertado' => 'sometimes|required|numeric',
+            'dias_entrega' => 'sometimes|required|integer',
+            'condicion_pieza' => 'sometimes|required|string|max:255',
+            'meses_garantia' => 'nullable|integer',
+            'es_aceptada' => 'nullable|boolean',
+            'fecha_oferta' => 'sometimes|required|date',
+        ]);
+
+        $oferta->update($validateData);
+
+        return response([
+            'success' => true,
+            'msg' => 'Oferta updated successfully',
+            'oferta' => $oferta
+        ], 200);
     }
 
     /**
@@ -60,6 +138,20 @@ class OfertasController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $oferta = oferta::find($id);
+
+        if (!$oferta) {
+            return response([
+                'success' => false,
+                'msg' => 'Oferta not found'
+            ], 404);
+        }
+
+        $oferta->delete();
+
+        return response([
+            'success' => true,
+            'msg' => 'Oferta deleted successfully'
+        ], 200);
     }
 }

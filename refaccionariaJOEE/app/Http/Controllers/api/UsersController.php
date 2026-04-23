@@ -5,43 +5,19 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $users = User::all();
-        if ($users->isEmpty()) {
-            return response([
-                'success' => false,
-                'message' => 'No users found'
-            ], 404);
-        } else {
-            return response([
-                'success' => true,
-                'users' => $users
-            ], 200);
-        }
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
         return response([
-            'success' => false,
-            'message' => 'Method not allowed for API'
-        ], 405);
+            'success' => true,
+            'users' => $users
+        ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validateData = $request->validate([
@@ -61,64 +37,40 @@ class UsersController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        $validateData['password'] = Hash::make($validateData['password']);
-
         $user = User::create($validateData);
 
-        if ($user) {
-            return response([
-                'success' => true,
-                'message' => 'User created successfully',
-                'user' => $user
-            ], 201);
-        } else {
-            return response([
-                'success' => false,
-                'message' => 'User creation failed'
-            ], 500);
-        }
+        return response([
+            'success' => true,
+            'msg' => 'User created successfully',
+            'user' => $user
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $user = User::find($id);
-        if ($user) {
-            return response([
-                'success' => true,
-                'user' => $user
-            ], 200);
-        } else {
-            return response([
-                'success' => false,
-                'message' => 'User not found'
-            ], 404);
-        }
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        return response([
-            'success' => false,
-            'message' => 'Method not allowed for API'
-        ], 405);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $user = User::find($id);
         if (!$user) {
             return response([
                 'success' => false,
-                'message' => 'User not found'
+                'msg' => 'User not found'
+            ], 404);
+        }
+
+        return response([
+            'success' => true,
+            'user' => $user
+        ], 200);
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'User not found'
             ], 404);
         }
 
@@ -139,39 +91,31 @@ class UsersController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        if (!empty($validateData['password'])) {
-            $validateData['password'] = Hash::make($validateData['password']);
-        } else {
-            unset($validateData['password']);
-        }
-
         $user->update($validateData);
 
         return response([
             'success' => true,
-            'message' => 'User updated successfully',
+            'msg' => 'User updated successfully',
             'user' => $user
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $user = User::find($id);
+
         if (!$user) {
             return response([
                 'success' => false,
-                'message' => 'User not found'
+                'msg' => 'User not found'
             ], 404);
         }
-        
+
         $user->delete();
-        
+
         return response([
             'success' => true,
-            'message' => 'User deleted successfully'
+            'msg' => 'User deleted successfully'
         ], 200);
     }
 }
