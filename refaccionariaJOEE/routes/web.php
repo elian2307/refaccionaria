@@ -60,3 +60,6 @@ Route::middleware(['auth', 'role:admin,comprador'])->group(function () {
     Route::post('/dash/offers/update/{id}', [AdminController::class, 'updateOffer'])->name('offers.update');
     Route::delete('/dash/offers/delete/{id}', [AdminController::class, 'deleteOffer'])->name('offers.delete');
 });
+Route::get('/docs', function () {
+    return view('docs');
+});
