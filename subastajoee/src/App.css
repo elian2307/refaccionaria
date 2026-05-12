@@ -1,0 +1,314 @@
+/* -----------------------------------------------    GENERAL       -------------------------------------------- */
+:root {
+  /* Dashboard Exact Brand Colors */
+  --primary: #ffc918;
+  --secondary: #fda036;
+  --bg-dark: #302723;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --text-main: #fefefe;
+  --text-lessopacityxd: #cecece;
+  --success: #39e729;
+  --pending: #ffe448;
+  --danger: #ee4343;
+  --dark: #101010;
+  --darkest: #040404;
+
+  /* Aliasing old variables to new ones for compatibility with components */
+  --primary-color: var(--primary);
+  --primary-hover: var(--secondary);
+  --secondary-color: var(--secondary);
+  --surface: var(--card-bg);
+  --surface-hover: rgba(255, 255, 255, 0.1);
+  --text-muted: var(--text-lessopacityxd);
+
+  /* Typography */
+  --font-body: 'Poppins', sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+  --radius-md: 12px;
+  --radius-lg: 1rem; /* Matched from dashboard .card */
+  --transition: all 0.25s ease;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) rgba(255, 255, 255, 0.02);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: radial-gradient(circle at top left, #1d1c1b, #1a1918);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--secondary);
+}
+
+/* Glassmorphism utility matched to Dashboard card */
+.glass-panel {
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  transition: transform 0.25s ease;
+}
+
+.glass-panel:hover {
+  transform: translateY(-0.2rem) scale(1.01);
+}
+
+/* Custom Buttons - matching dashboard .btn / .search */
+.btn-primary-custom {
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  border: none;
+  color: var(--darkest);
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  transition: var(--transition);
+}
+
+.btn-primary-custom:hover {
+  transform: scale(1.05);
+  color: var(--darkest);
+}
+
+.btn-outline-custom {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--primary);
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  transition: 0.25s ease;
+}
+
+.btn-outline-custom:hover {
+  background: var(--primary);
+  color: var(--dark);
+  transform: translateY(-2px);
+}
+
+/* Navbar specifics */
+.navbar-custom {
+  background: var(--dark) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 0;
+}
+
+.navbar-custom .navbar-brand {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.5rem;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navbar-custom .nav-link {
+  color: var(--text-main) !important;
+  font-weight: 300;
+  margin: 0 10px;
+  transition: var(--transition);
+  padding: 0.5rem 1rem;
+}
+
+.navbar-custom .nav-link:hover,
+.navbar-custom .nav-link.active {
+  color: var(--primary) !important;
+  background: linear-gradient(to right, #040404,#101010) !important;
+  border-radius: 8px;
+}
+
+/* Content wrapper */
+.main-content {
+  flex: 1;
+  padding-top: 80px; /* Space for fixed navbar */
+  padding-bottom: 40px;
+}
+
+/* Footer - matched to dashboard */
+.footer-custom {
+  background-color: var(--darkest);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 2rem;
+  margin-top: auto;
+  font-weight: 300;
+}
+
+/* Custom inputs - matched to dashboard .search / .edit-input */
+.form-control-custom {
+  background-color: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  border-radius: 6rem;
+  padding: 1rem;
+  transition: var(--transition);
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+}
+
+textarea.form-control-custom {
+  border-radius: 1.5rem;
+}
+
+.form-control-custom:focus {
+  background-color: var(--card-bg);
+  border-color: var(--primary);
+  color: var(--text-main);
+  box-shadow: none;
+}
+
+.form-control-custom::placeholder {
+  color: var(--text-lessopacityxd);
+}
+
+.form-control-custom:hover {
+  transform: scale(1.02);
+}
+
+/* Custom badges */
+.bg-primary { background-color: var(--primary) !important; color: var(--dark) !important; }
+.bg-danger { background-color: var(--danger) !important; }
+.bg-warning { background-color: var(--pending) !important; color: var(--dark) !important;}
+.bg-info { background-color: var(--success) !important; color: var(--dark) !important;}
+.bg-secondary { background-color: var(--card-bg) !important; border: 1px solid rgba(255,255,255,0.1); color: var(--text-main) !important; }
+
+/* Scrollbar styling matched to dashboard */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--primary), var(--secondary));
+  border-radius: 10px;
+  border: 2px solid #0f172a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary); 
+  cursor: pointer;
+}
+
+/* Dashboard Specific Layout */
+.dashboard-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background: radial-gradient(circle at top left, #1d1c1b, #1a1918);
+}
+
+.dashboard-sidebar {
+  width: 20%;
+  background: var(--dark);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.dashboard-main {
+  width: 80%;
+  padding: 2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  font-weight: 500;
+  font-size: 2rem;
+  color: var(--text-main);
+  margin-bottom: 0;
+}
+
+.dashboard-header p {
+  color: var(--text-lessopacityxd);
+  font-weight: 400;
+  font-size: 1.2rem;
+  margin-bottom: 0;
+}
+
+.sidebar-logo {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  padding: 2rem;
+  text-decoration: none;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  width: 100%;
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: var(--text-main);
+  text-decoration: none;
+  transition: 0.25s;
+}
+
+.sidebar-nav-link:hover, .sidebar-nav-link.active {
+  color: var(--primary);
+  background: linear-gradient(to right, #040404,#101010);
+  padding-left: 3rem; /* Indent effect */
+}
+
