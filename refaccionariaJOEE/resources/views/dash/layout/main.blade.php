@@ -45,6 +45,20 @@
 
     @include('dash.layout.modals')
 
+<div id="toast-container"></div>
+
+<div id="customConfirmModal" class="modal">
+    <div class="modal-content confirm-modal-content">
+        <h3 id="confirmTitle">Confirm action</h3>
+        <p id="confirmMessage">Are you sure you want to continue?</p>
+
+        <div class="modal-actions">
+            <button id="confirmCancelBtn" class="btn">Cancel</button>
+            <button id="confirmOkBtn" class="btn dan">Confirm</button>
+        </div>
+    </div>
+</div>
+
 </body>
 
 </html>

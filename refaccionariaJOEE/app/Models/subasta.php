@@ -13,9 +13,15 @@ class subasta extends Model
         'marca_vehiculo',
         'modelo_vehiculo',
         'anio_vehiculo',
+        'nombre_refaccion',
         'descripcion_problema',
         'urgencia',
         'estado',
         'fecha_expiracion',
     ];
+
+    public function img_subastas()
+    {
+        return $this->hasMany(img_subasta::class, 'subasta_id');
+    }
 }

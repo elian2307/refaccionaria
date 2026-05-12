@@ -27,7 +27,7 @@ class resenasSeeder extends Seeder
             'pedido_id' => 1,
             'autor_id' => 2,
             'receptor_id' => 1,
-            'calificacion' => 6,
+            'calificacion' => 3,
             'comentario' => 'Buen producto, aunque la entrega tardó un poco más de lo esperado.',
             'fecha_resena' => now(),
         ]);
@@ -36,8 +36,8 @@ class resenasSeeder extends Seeder
         $dato->pedido_id = 2;
         $dato->autor_id = 1;
         $dato->receptor_id = 2;
-        $dato->calificacion = 5;
-        $dato->comentario = 'Excelente experiencia, producto de alta calidad y entrega rápida.';
+        $dato->calificacion = 1;
+        $dato->comentario = 'Pieza de mierda.';
         $dato->fecha_resena = now();
         $dato->save();
 
@@ -45,8 +45,8 @@ class resenasSeeder extends Seeder
         $dato->pedido_id = 1;
         $dato->autor_id = 2;
         $dato->receptor_id = 1;
-        $dato->calificacion = 6;
-        $dato->comentario = 'Buen producto, aunque la entrega tardó un poco más de lo esperado.';
+        $dato->calificacion = 2;
+        $dato->comentario = 'Cago mejores cosas en la mañana papi.';
         $dato->fecha_resena = now();
         $dato->save();
     }

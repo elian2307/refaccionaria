@@ -14,16 +14,31 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
             $table->string('nombre');
+            $table->string('apellidos')->nullable();
+
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // Rol para permisos del sistema
+            $table->enum('rol', ['admin', 'vendedor', 'comprador'])->default('comprador');
+
+            // Tipo de usuario / negocio
             $table->enum('tipo_usuario', ['taller', 'refaccionaria', 'flotilla', 'admin', 'usuario'])->default('usuario');
-            $table->string('id_fiscal')->unique();
-            $table->string('telefono');
+
+            $table->string('id_fiscal')->nullable();
+            $table->string('telefono', 20)->nullable();
+
             $table->decimal('reputacion', 3, 2)->default(0.00);
             $table->boolean('is_premium')->default(false);
-            $table->timestamp('fecha_registro')->useCurrent();
+
+            $table->date('fecha_registro')->nullable();
+
+            $table->string('foto_perfil')->nullable();
+            $table->boolean('is_active')->default(true);
+
             $table->rememberToken();
             $table->timestamps();
         });
@@ -49,8 +64,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };
