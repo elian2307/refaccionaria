@@ -9,10 +9,10 @@ export default function Home() {
                 <Container>
                     <Row className="align-items-center min-vh-50">
                         <Col lg={6} className="text-center text-lg-start mb-5 mb-lg-0">
-                            <h1 className="display-4 fw-bold mb-4">
+                            <h1 className="display-4 fw-bold mb-4 text-white">
                                 Compra y vende refacciones al <span style={{ color: 'var(--primary)' }}>Mejor Postor</span>
                             </h1>
-                            <p className="lead text-muted mb-4">
+                            <p className="lead text-white-50 mb-4">
                                 Publica piezas de vehículos (motores, transmisiones, accesorios) y deja que otros usuarios pujen por ellas, o encuentra las piezas que necesitas al precio que tú decidas.
                             </p>
                             <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
@@ -31,11 +31,11 @@ export default function Home() {
                                     <h3 className="mb-3 text-white">Subastas Calientes</h3>
                                     <div className="d-flex align-items-center justify-content-center gap-2 mb-3">
                                         <span className="spinner-grow spinner-grow-sm text-danger" role="status" aria-hidden="true"></span>
-                                        <span className="text-muted">Motor V8 Hemi - Dodge Charger 2018</span>
+                                        <span className="text-light">Motor V8 Hemi - Dodge Charger 2018</span>
                                     </div>
                                     <div className="d-flex align-items-center justify-content-center gap-2">
                                         <span className="spinner-grow spinner-grow-sm text-warning" role="status" aria-hidden="true"></span>
-                                        <span className="text-muted">Transmisión Automática - Honda Civic</span>
+                                        <span className="text-light">Transmisión Automática - Honda Civic</span>
                                     </div>
                                 </div>
                             </div>

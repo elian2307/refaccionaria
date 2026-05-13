@@ -28,7 +28,7 @@ return new class extends Migration
             // Tipo de usuario / negocio
             $table->enum('tipo_usuario', ['taller', 'refaccionaria', 'flotilla', 'admin', 'usuario'])->default('usuario');
 
-            $table->string('id_fiscal')->nullable();
+            $table->string('id_fiscal')->nullable()->unique();
             $table->string('telefono', 20)->nullable();
 
             $table->decimal('reputacion', 3, 2)->default(0.00);

@@ -14,6 +14,9 @@ use App\Http\Controllers\api\AuthController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Rutas públicas
+Route::get('/subasta', [SubastasController::class, 'index']);
+
 Route::middleware('jwt')->group(function () {
     Route::get('/user', [AuthController::class, 'getUser']);
     Route::put('/user', [AuthController::class, 'updateUser']);
@@ -21,7 +24,7 @@ Route::middleware('jwt')->group(function () {
 
     Route::resource('users', UsersController::class);
     Route::resource('direccion', DireccionesController::class);
-    Route::resource('subasta', SubastasController::class);
+    Route::resource('subasta', SubastasController::class)->except(['index']);
     Route::resource('oferta', OfertasController::class);
     Route::resource('pedido', PedidosController::class);
     Route::resource('resena', ResenasController::class);
