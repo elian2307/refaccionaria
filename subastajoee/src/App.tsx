@@ -10,6 +10,7 @@ import MisSubastas from "./views/dashboard/MisSubastas";
 import MisOfertas from "./views/dashboard/MisOfertas";
 import MisPedidos from "./views/dashboard/MisPedidos";
 import MisResenas from "./views/dashboard/MisResenas";
+import AuctionDetail from "./views/AuctionDetail";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="auctions" element={<Auctions />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="auctions/:id" element={<AuctionDetail />} />
         </Route>
 
         {/* Protected Dashboard Routes with Dashboard Layout */}

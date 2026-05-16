@@ -311,4 +311,358 @@ textarea.form-control-custom {
   background: linear-gradient(to right, #040404,#101010);
   padding-left: 3rem; /* Indent effect */
 }
+/* -----------------------------------------------    
+   DETALLE DE SUBASTA / REFACCIÓN (Agragmos esto para no perdernos en las updates)
+-------------------------------------------- */
+.auction-detail-visual {
+  min-height: 420px;
+  background:
+    radial-gradient(circle at top, rgba(255, 201, 24, 0.25), transparent 45%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+}
 
+.detail-visual-icon {
+  font-size: 5rem;
+  display: inline-block;
+  filter: drop-shadow(0 10px 25px rgba(255, 201, 24, 0.25));
+}
+
+.detail-info-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.detail-info-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.detail-info-item span {
+  color: var(--text-lessopacityxd);
+}
+
+.detail-info-item strong {
+  color: var(--text-main);
+  text-align: right;
+}
+
+@media (max-width: 576px) {
+  .detail-info-item {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .auction-detail-visual {
+    min-height: 300px;
+  }
+
+  .detail-visual-icon {
+    font-size: 4rem;
+  }
+  /* -----------------------------------------------    
+   CARDS DEL LISTADO DE SUBASTAS
+-------------------------------------------- */
+}
+.auction-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auction-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+}
+
+.auction-card-description {
+  min-height: 64px;
+  line-height: 1.6;
+}
+
+.auction-card-info {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.auction-card-info-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.auction-card-info-item span {
+  color: var(--text-lessopacityxd);
+  font-size: 0.85rem;
+}
+
+.auction-card-info-item strong {
+  color: var(--text-main);
+  text-align: right;
+}
+
+@media (max-width: 576px) {
+  .auction-card-info-item {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .auction-card-description {
+    min-height: auto;
+  }
+}
+/* -----------------------------------------------    
+   BOTÓN DE DETALLES ANTERIOR
+-------------------------------------------- */
+.btn-detail-custom {
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-detail-custom:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  transform: translateY(-1px);
+}
+
+.btn-detail-custom:focus,
+.btn-detail-custom:active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow: none;
+}
+/* -----------------------------------------------    
+   BOTONES DE ACCIÓN EN SUBASTAS
+-------------------------------------------- */
+.auction-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.auction-action-btn {
+  width: 100%;
+  border-radius: 50px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  transition: var(--transition);
+  border: 1px solid transparent;
+}
+
+.auction-action-secondary {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.auction-action-secondary:hover,
+.auction-action-secondary:focus {
+  color: var(--primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 201, 24, 0.35);
+  transform: translateY(-2px);
+  box-shadow: none;
+}
+
+.auction-action-primary {
+  color: var(--darkest);
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  border-color: transparent;
+}
+
+.auction-action-primary:hover,
+.auction-action-primary:focus {
+  color: var(--darkest);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(255, 201, 24, 0.18);
+}
+/* -----------------------------------------------    
+   HOME / PÁGINA PRINCIPAL
+-------------------------------------------- */
+.text-gradient-custom {
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.home-hero-card {
+  min-height: 420px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 201, 24, 0.18), transparent 40%),
+    var(--card-bg);
+}
+
+.home-live-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.home-live-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.home-live-badge {
+  color: var(--darkest);
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  border-radius: 50px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.btn-home-secondary {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50px;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  transition: var(--transition);
+}
+
+.btn-home-secondary:hover,
+.btn-home-secondary:focus {
+  color: var(--primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 201, 24, 0.35);
+  transform: translateY(-2px);
+  box-shadow: none;
+}
+
+.home-category-card,
+.home-info-card {
+  transition: var(--transition);
+}
+
+.home-category-card:hover,
+.home-info-card:hover {
+  transform: translateY(-5px);
+}
+
+.home-category-dot {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--primary), var(--secondary));
+  box-shadow: 0 12px 28px rgba(255, 201, 24, 0.18);
+}
+
+.home-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--darkest);
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  border-radius: 50px;
+  padding: 0.45rem 0.9rem;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.home-cta-card {
+  background:
+    radial-gradient(circle at top, rgba(255, 201, 24, 0.16), transparent 45%),
+    var(--card-bg);
+}
+
+.home-cta-button {
+  max-width: 260px;
+  margin: 0 auto;
+}
+/* -----------------------------------------------    
+   RESPONSIVE DEL HOMEw
+-------------------------------------------- */
+@media (max-width: 576px) {
+  .home-live-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .home-hero-card {
+    min-height: auto;
+  }
+}
+/* -----------------------------------------------    
+   RESPONSIVE GENERAL
+-------------------------------------------- */
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 92px;
+  }
+
+  .hero-section {
+    margin-top: 1rem !important;
+  }
+
+  .hero-section h1 {
+    font-size: 2.4rem;
+    line-height: 1.15;
+  }
+
+  .hero-section .lead {
+    font-size: 1rem;
+  }
+
+  .btn-primary-custom,
+  .btn-home-secondary,
+  .auction-action-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbar-custom .navbar-collapse {
+    padding-top: 1rem;
+  }
+
+  .navbar-custom .nav-link {
+    margin: 0.25rem 0;
+    text-align: center;
+  }
+}
+/* -----------------------------------------------    
+   RESPONSIVE PARA CELULARES
+-------------------------------------------- */
+@media (max-width: 576px) {
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+
+  .home-live-item {
+    width: 100%;
+  }
+
+  .home-category-card h6 {
+    font-size: 0.9rem;
+  }
+
+  .auction-card {
+    margin-bottom: 0.5rem;
+  }
+
+  .auction-action-btn {
+    font-size: 0.9rem;
+    padding: 0.7rem 1rem;
+  }
+}

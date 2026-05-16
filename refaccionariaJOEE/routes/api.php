@@ -16,6 +16,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Rutas públicas
 Route::get('/subasta', [SubastasController::class, 'index']);
+Route::get('/subasta/{id}', [SubastasController::class, 'show']);
 
 Route::middleware('jwt')->group(function () {
     Route::get('/user', [AuthController::class, 'getUser']);

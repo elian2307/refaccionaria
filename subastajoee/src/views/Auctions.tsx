@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 interface Subasta {
     id: number;
@@ -31,7 +32,7 @@ export default function Auctions() {
                 } : {};
 
                 const response = await axios.get('http://localhost:8000/api/subasta', config);
-                
+
                 if (response.data.success) {
                     setSubastas(response.data.subastas);
                 } else {
@@ -55,6 +56,41 @@ export default function Auctions() {
             case 'baja': return 'info';
             default: return 'secondary';
         }
+    };
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'abierta': return 'success';
+            case 'cerrada': return 'secondary';
+            case 'cancelada': return 'danger';
+            case 'finalizada': return 'primary';
+            default: return 'secondary';
+        }
+    };
+
+    const formatText = (value: string) => {
+        if (!value) return 'No especificado';
+        return value.charAt(0).toUpperCase() + value.slice(1);
+    };
+
+    const formatDate = (value: string) => {
+        if (!value) return 'No especificada';
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return value;
+        }
+
+        return date.toLocaleDateString('es-MX', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
+    };
+
+    const shortDescription = (value: string) => {
+        if (!value) return 'Sin descripción disponible.';
+        return value.length > 115 ? `${value.slice(0, 115)}...` : value;
     };
 
     return (
@@ -93,35 +129,59 @@ export default function Auctions() {
             <Row className="g-4">
                 {subastas.map((req) => (
                     <Col key={req.id} xs={12} md={6} lg={4}>
-                        <Card className="glass-panel h-100 text-white border-0">
+                        <Card className="glass-panel h-100 text-white border-0 auction-card">
                             <Card.Header className="bg-transparent border-bottom border-secondary pt-4 pb-3">
-                                <div className="d-flex justify-content-between align-items-start">
-                                    <h5 className="fw-bold text-primary mb-0">{req.nombre_refaccion}</h5>
-                                    {/* 
-                                    <Badge bg={getUrgencyColor(req.urgencia)}>
-                                        Condición: {req.urgencia.charAt(0).toUpperCase() + req.urgencia.slice(1)}
-                                    </Badge> 
-                                    */}
-                                </div>
-                                <p className="text-white-50 small mt-2 mb-0">
-                                    {req.marca_vehiculo} {req.modelo_vehiculo} {req.anio_vehiculo}
-                                </p>
-                            </Card.Header>
-                            <Card.Body className="d-flex flex-column p-4">
-                                <p className="mb-4 small">{req.descripcion_problema}</p>
-                                
-                                <div className="mt-auto d-flex justify-content-between align-items-end">
+                                <div className="d-flex justify-content-between align-items-start gap-3">
                                     <div>
-                                        <p className="text-white-50 small mb-1">Pujas Recibidas</p>
-                                        <h4 className="fw-bold mb-0">{req.ofertas_count || 0}</h4>
+                                        <h5 className="fw-bold text-primary mb-2">
+                                            {req.nombre_refaccion}
+                                        </h5>
+
+                                        <p className="text-white-50 small mb-0">
+                                            {req.marca_vehiculo} {req.modelo_vehiculo} {req.anio_vehiculo}
+                                        </p>
                                     </div>
-                                    <div className="text-end">
-                                        <p className="text-white-50 small mb-1">Termina en</p>
-                                        <Badge bg="secondary" className="fs-6 fw-normal">{req.fecha_expiracion}</Badge>
+
+                                    <Badge bg={getUrgencyColor(req.urgencia)} className="rounded-pill px-3 py-2">
+                                        {formatText(req.urgencia)}
+                                    </Badge>
+                                </div>
+                            </Card.Header>
+
+                            <Card.Body className="d-flex flex-column p-4">
+                                <div className="mb-3">
+                                    <Badge bg={getStatusColor(req.estado)} className="rounded-pill px-3 py-2">
+                                        Estado: {formatText(req.estado)}
+                                    </Badge>
+                                </div>
+
+                                <p className="mb-4 small text-white-50 auction-card-description">
+                                    {shortDescription(req.descripcion_problema)}
+                                </p>
+
+                                <div className="auction-card-info mt-auto">
+                                    <div className="auction-card-info-item">
+                                        <span>Pujas recibidas</span>
+                                        <strong>{req.ofertas_count || 0}</strong>
+                                    </div>
+
+                                    <div className="auction-card-info-item">
+                                        <span>Fecha límite</span>
+                                        <strong>{formatDate(req.fecha_expiracion)}</strong>
                                     </div>
                                 </div>
+
                                 <hr className="my-3 border-secondary" />
-                                <button className="btn btn-outline-custom w-100">Pujar / Hacer Oferta</button>
+
+                                <div className="auction-actions">
+                                    <Link to={`/auctions/${req.id}`} className="btn auction-action-btn auction-action-secondary">
+                                        Ver detalles
+                                    </Link>
+
+                                    <button className="btn auction-action-btn auction-action-primary">
+                                        Pujar / Hacer Oferta
+                                    </button>
+                                </div>
                             </Card.Body>
                         </Card>
                     </Col>
