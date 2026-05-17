@@ -3,18 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Alert, Badge, Button, Card, Col, Container, Row, Spinner } from 'react-bootstrap'
 import axios from 'axios'
 
-interface Subasta {
-  id: number
-  marca_vehiculo: string
-  modelo_vehiculo: string
-  anio_vehiculo: string | number
-  nombre_refaccion: string
-  descripcion_problema: string
-  urgencia: string
-  estado: string
-  fecha_expiracion: string
-  ofertas_count?: number
-}
+import type { Subasta } from '../interfaces/Subasta';
 
 export default function AuctionDetail() {
   const { id } = useParams()

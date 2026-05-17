@@ -2,25 +2,9 @@ import { useEffect, useState } from 'react';
 import { Alert, Badge, Card, Col, Container, ProgressBar, Row, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 
-interface Logro {
-    nombre: string;
-    descripcion: string;
-    desbloqueado: boolean;
-}
+import type { GamificacionData } from '../../interfaces/Gamificacion';
 
-interface GamificacionData {
-    puntos: number;
-    nivel: number;
-    nombre_nivel: string;
-    insignia: string;
-    beneficio: string;
-    puntos_siguiente_nivel: number | null;
-    puntos_restantes: number;
-    progreso: number;
-    logros: Logro[];
-}
-
-export default function Gamificacion() {
+export default function NivelesJOEE() {
     const [gamificacion, setGamificacion] = useState<GamificacionData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -39,7 +23,7 @@ export default function Gamificacion() {
                 if (response.data.success) {
                     setGamificacion(response.data.gamificacion);
                 } else {
-                    setError('No se pudo cargar la gamificación.');
+                    setError('No se pudieron cargar los Niveles JOEE.');
                 }
             } catch (err: any) {
                 const status = err.response?.status;
@@ -50,7 +34,7 @@ export default function Gamificacion() {
                     localStorage.removeItem('user');
                     setError('Tu sesión expiró o el token ya no es válido. Vuelve a iniciar sesión.');
                 } else {
-                    setError('Error al cargar la gamificación.');
+                    setError('Error al cargar los Niveles JOEE.');
                 }
             } finally {
                 setLoading(false);
@@ -72,7 +56,7 @@ export default function Gamificacion() {
     if (error || !gamificacion) {
         return (
             <Alert variant="danger">
-                {error || 'No se encontró información de gamificación.'}
+                {error || 'No se encontró información de Niveles JOEE.'}
             </Alert>
         );
     }
@@ -82,7 +66,7 @@ export default function Gamificacion() {
             <div className="gamification-heading mb-4">
                 <div>
                     <p className="text-white-50 mb-1">Progreso del usuario</p>
-                    <h2 className="fw-bold text-white mb-0">Gamificación</h2>
+                    <h2 className="fw-bold text-white mb-0">Niveles JOEE</h2>
                 </div>
 
                 <Badge bg="primary" className="px-3 py-2 rounded-pill">
@@ -101,7 +85,7 @@ export default function Gamificacion() {
                                 </div>
 
                                 <div className="text-md-end">
-                                    <p className="text-white-50 mb-1">Puntos acumulados</p>
+                                    <p className="text-white-50 mb-1">Puntos JOEE acumulados</p>
                                     <h2 className="fw-bold text-warning mb-0">{gamificacion.puntos}</h2>
                                 </div>
                             </div>
@@ -122,7 +106,7 @@ export default function Gamificacion() {
 
                                 <p className="text-white-50 small mt-3 mb-0">
                                     {gamificacion.puntos_siguiente_nivel
-                                        ? `Te faltan ${gamificacion.puntos_restantes} puntos para el siguiente nivel.`
+                                        ? `Te faltan ${gamificacion.puntos_restantes} puntos JOEE para el siguiente nivel.`
                                         : 'Ya alcanzaste el nivel máximo disponible.'}
                                 </p>
                             </div>

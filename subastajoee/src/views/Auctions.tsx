@@ -3,18 +3,7 @@ import { Container, Row, Col, Card, Badge, Spinner, Alert } from 'react-bootstra
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
-interface Subasta {
-    id: number;
-    marca_vehiculo: string;
-    modelo_vehiculo: string;
-    anio_vehiculo: string | number;
-    nombre_refaccion: string;
-    descripcion_problema: string;
-    urgencia: string;
-    estado: string;
-    fecha_expiracion: string;
-    ofertas_count?: number;
-}
+import type { Subasta } from '../interfaces/Subasta';
 
 export default function Auctions() {
     const [subastas, setSubastas] = useState<Subasta[]>([]);

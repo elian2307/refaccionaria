@@ -42,9 +42,9 @@ export default function Sidebar() {
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/dashboard/gamificacion" className={({ isActive }) => isActive ? "sidebar-nav-link active" : "sidebar-nav-link"}>
+                        <NavLink to="/dashboard/niveles" className={({ isActive }) => isActive ? "sidebar-nav-link active" : "sidebar-nav-link"}>
                             <i className="fa-solid fa-trophy"></i>
-                            Gamificación
+                            Niveles JOEE
                         </NavLink>
                     </li>
                 </ul>

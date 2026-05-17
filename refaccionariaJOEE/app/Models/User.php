@@ -176,22 +176,22 @@ class User extends Authenticatable implements JWTSubject
             ],
             [
                 'nombre' => 'Participante activo',
-                'descripcion' => 'Alcanza 100 puntos de gamificación.',
+                'descripcion' => 'Alcanza 100 puntos JOEE.',
                 'desbloqueado' => $puntos >= 100,
             ],
             [
                 'nombre' => 'Subastador confiable',
-                'descripcion' => 'Alcanza 250 puntos de gamificación.',
+                'descripcion' => 'Alcanza 250 puntos JOEE.',
                 'desbloqueado' => $puntos >= 250,
             ],
             [
                 'nombre' => 'Experto en refacciones',
-                'descripcion' => 'Alcanza 500 puntos de gamificación.',
+                'descripcion' => 'Alcanza 500 puntos JOEE.',
                 'desbloqueado' => $puntos >= 500,
             ],
             [
                 'nombre' => 'Maestro JOEE',
-                'descripcion' => 'Alcanza 1000 puntos de gamificación.',
+                'descripcion' => 'Alcanza 1000 puntos JOEE.',
                 'desbloqueado' => $puntos >= 1000,
             ],
         ];
