@@ -44,10 +44,17 @@ class SubastasController extends Controller
 
         $subasta = subasta::create($validateData);
 
+        $user = User::find($validateData['user_id']);
+
+        if ($user) {
+            $user->agregarPuntosGamificacion(25);
+        }
+
         return response([
             'success' => true,
             'msg' => 'Subasta created successfully',
-            'subasta' => $subasta
+            'subasta' => $subasta,
+            'gamificacion' => $user ? $user->resumenGamificacion() : null
         ], 201);
     }
 

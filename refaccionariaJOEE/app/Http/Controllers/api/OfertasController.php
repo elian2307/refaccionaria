@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\oferta;
+use App\Models\User;
 
 class OfertasController extends Controller
 {
@@ -51,10 +52,17 @@ class OfertasController extends Controller
 
         $oferta = oferta::create($validateData);
 
+        $user = User::find($validateData['proveedor_id']);
+
+        if ($user) {
+            $user->agregarPuntosGamificacion(15);
+        }
+
         return response([
             'success' => true,
             'msg' => 'Oferta created successfully',
-            'oferta' => $oferta
+            'oferta' => $oferta,
+            'gamificacion' => $user ? $user->resumenGamificacion() : null
         ], 201);
     }
 

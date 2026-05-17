@@ -666,3 +666,86 @@ textarea.form-control-custom {
     padding: 0.7rem 1rem;
   }
 }
+/* -----------------------------------------------
+   GAMIFICACIÓN / DASHBOARD
+-------------------------------------------- */
+
+.gamification-view {
+  width: 100%;
+}
+
+.gamification-badge-box {
+  padding: 1.25rem;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 201, 24, 0.16), transparent 45%),
+    rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gamification-progress {
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.gamification-progress .progress-bar {
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+}
+
+.achievement-card {
+  min-height: 130px;
+  padding: 1rem;
+  border-radius: 18px;
+  transition: var(--transition);
+}
+
+.achievement-card:hover {
+  transform: translateY(-3px);
+}
+
+.achievement-unlocked {
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at top right, rgba(255, 201, 24, 0.14), transparent 45%),
+    rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 201, 24, 0.25);
+}
+
+.achievement-locked {
+  color: var(--text-lessopacityxd);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0.72;
+}
+
+.achievement-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 800;
+}
+.gamification-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (max-width: 576px) {
+  .gamification-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+.sidebar-logout-button {
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}

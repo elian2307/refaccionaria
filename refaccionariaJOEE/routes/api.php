@@ -10,6 +10,7 @@ use App\Http\Controllers\api\PedidosController;
 use App\Http\Controllers\api\ResenasController;
 use App\Http\Controllers\api\ImgSubastasController;
 use App\Http\Controllers\api\AuthController;
+use App\Http\Controllers\api\GamificacionController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -22,6 +23,8 @@ Route::middleware('jwt')->group(function () {
     Route::get('/user', [AuthController::class, 'getUser']);
     Route::put('/user', [AuthController::class, 'updateUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/gamificacion', [GamificacionController::class, 'show']);
 
     Route::resource('users', UsersController::class);
     Route::resource('direccion', DireccionesController::class);

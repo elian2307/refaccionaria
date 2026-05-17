@@ -11,6 +11,7 @@ import MisOfertas from "./views/dashboard/MisOfertas";
 import MisPedidos from "./views/dashboard/MisPedidos";
 import MisResenas from "./views/dashboard/MisResenas";
 import AuctionDetail from "./views/AuctionDetail";
+import Gamificacion from "./views/dashboard/Gamificacion";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="ofertas" element={<MisOfertas />} />
           <Route path="pedidos" element={<MisPedidos />} />
           <Route path="resenas" element={<MisResenas />} />
+          <Route path="gamificacion" element={<Gamificacion />} />
         </Route>
       </Routes>
     </BrowserRouter>
