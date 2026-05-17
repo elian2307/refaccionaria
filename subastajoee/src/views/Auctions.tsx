@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 
 import type { Subasta } from '../interfaces/Subasta';
 
@@ -9,6 +9,9 @@ export default function Auctions() {
     const [subastas, setSubastas] = useState<Subasta[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    const context = useOutletContext<{ handleShowLogin?: () => void }>();
+    const handleShowLogin = context?.handleShowLogin;
 
     useEffect(() => {
         const fetchSubastas = async () => {
@@ -80,6 +83,15 @@ export default function Auctions() {
     const shortDescription = (value: string) => {
         if (!value) return 'Sin descripción disponible.';
         return value.length > 115 ? `${value.slice(0, 115)}...` : value;
+    };
+
+    const handleMakeOfferClick = () => {
+        const token = localStorage.getItem('token');
+        if (!token && handleShowLogin) {
+            handleShowLogin();
+            return;
+        }
+        // Lógica de pujar
     };
 
     return (
@@ -167,7 +179,7 @@ export default function Auctions() {
                                         Ver detalles
                                     </Link>
 
-                                    <button className="btn auction-action-btn auction-action-primary">
+                                    <button onClick={handleMakeOfferClick} className="btn auction-action-btn auction-action-primary">
                                         Pujar / Hacer Oferta
                                     </button>
                                 </div>

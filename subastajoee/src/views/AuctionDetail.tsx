@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useOutletContext } from 'react-router-dom'
 import { Alert, Badge, Button, Card, Col, Container, Row, Spinner } from 'react-bootstrap'
 import axios from 'axios'
 
@@ -10,6 +10,10 @@ export default function AuctionDetail() {
   const [subasta, setSubasta] = useState<Subasta | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Use context from Layout.tsx to open login modal
+  const context = useOutletContext<{ handleShowLogin?: () => void }>()
+  const handleShowLogin = context?.handleShowLogin
 
   useEffect(() => {
     const fetchSubasta = async () => {
@@ -78,6 +82,16 @@ export default function AuctionDetail() {
       month: 'long',
       year: 'numeric',
     })
+  }
+
+  const handleMakeOfferClick = () => {
+    const token = localStorage.getItem('token')
+    if (!token && handleShowLogin) {
+      handleShowLogin()
+      return
+    }
+    // Aquí iría la lógica para abrir el modal o formulario de oferta
+    console.log("Abrir formulario de oferta...")
   }
 
   if (loading) {
@@ -164,7 +178,7 @@ export default function AuctionDetail() {
                 </div>
               </div>
 
-              <Button className="btn-primary-custom w-100 mb-3">
+              <Button onClick={handleMakeOfferClick} className="btn-primary-custom w-100 mb-3">
                 Hacer oferta
               </Button>
 

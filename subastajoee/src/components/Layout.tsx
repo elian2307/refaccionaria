@@ -34,7 +34,6 @@ export default function Layout() {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         handleClose();
-        navigate('/dashboard');
       }
     } catch (err: any) {
       setError(err.response?.data?.msg || 'Error al iniciar sesión. Verifica tus credenciales.');
@@ -76,7 +75,7 @@ export default function Layout() {
       </Navbar>
 
       <main className="main-content">
-        <Outlet />
+        <Outlet context={{ handleShowLogin: handleShow }} />
       </main>
 
       <footer className="footer-custom text-center">
