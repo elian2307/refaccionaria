@@ -1,17 +1,33 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams, useOutletContext } from 'react-router-dom'
-import { Alert, Badge, Button, Card, Col, Container, Row, Spinner } from 'react-bootstrap'
-import { api } from '../services/api';
-import type { Subasta } from '../interfaces/Subasta';
+import { Alert, Badge, Button, Card, Col, Container, Form, Modal, Row, Spinner } from 'react-bootstrap'
+import { api, apiAuth } from '../services/api'
+import { getToken, getUser } from '../services/auth'
+import type { Subasta } from '../interfaces/Subasta'
 
+interface PujaForm {
+  precio_ofertado: string
+}
+
+const pujaInicial: PujaForm = {
+  precio_ofertado: '',
+}
 
 export default function AuctionDetail() {
   const { slug } = useParams()
+
   const [subasta, setSubasta] = useState<Subasta | null>(null)
   const [loading, setLoading] = useState(true)
+  const [savingOffer, setSavingOffer] = useState(false)
+
+  const [showOfferModal, setShowOfferModal] = useState(false)
+
+  const [offerError, setOfferError] = useState<string | null>(null)
+  const [offerSuccess, setOfferSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  
-  // Use context from Layout.tsx to open login modal
+
+  const [pujaForm, setPujaForm] = useState<PujaForm>(pujaInicial)
+
   const context = useOutletContext<{ handleShowLogin?: () => void }>()
   const handleShowLogin = context?.handleShowLogin
 
@@ -85,13 +101,71 @@ export default function AuctionDetail() {
   }
 
   const handleMakeOfferClick = () => {
-    const token = localStorage.getItem('token')
-    if (!token && handleShowLogin) {
-      handleShowLogin()
+    setOfferError(null)
+    setOfferSuccess(null)
+
+    if (!getToken()) {
+      if (handleShowLogin) {
+        handleShowLogin()
+      }
+
       return
     }
-    // Aquí iría la lógica para abrir el modal o formulario de oferta
-    console.log("Abrir formulario de oferta...")
+
+    const user = getUser()
+
+    if (user?.rol !== 'comprador' && user?.rol !== 'admin') {
+      setOfferError('Solo los compradores pueden hacer pujas.')
+      return
+    }
+
+    if (subasta?.estado !== 'abierta') {
+      setOfferError('Esta subasta no está abierta, por eso no se puede hacer una puja.')
+      return
+    }
+
+    setShowOfferModal(true)
+  }
+
+  const handleOfferChange = (field: keyof PujaForm, value: string) => {
+    setPujaForm((current) => ({
+      ...current,
+      [field]: value,
+    }))
+  }
+
+  const handleSubmitOffer = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    if (!subasta) return
+
+    setSavingOffer(true)
+    setOfferError(null)
+    setOfferSuccess(null)
+
+    try {
+      await apiAuth.post('/oferta', {
+      subasta_id: subasta.id,
+      precio_ofertado: Number(pujaForm.precio_ofertado),
+      })
+
+      setOfferSuccess('Tu puja se registró correctamente.')
+      setPujaForm(pujaInicial)
+      setShowOfferModal(false)
+
+      setSubasta((current) =>
+        current
+          ? {
+              ...current,
+              ofertas_count: (current.ofertas_count || 0) + 1,
+            }
+          : current
+      )
+    } catch (err: any) {
+      setOfferError(err.response?.data?.msg || 'No se pudo registrar la puja.')
+    } finally {
+      setSavingOffer(false)
+    }
   }
 
   if (loading) {
@@ -122,23 +196,26 @@ export default function AuctionDetail() {
         </Link>
       </div>
 
+      {offerError && <Alert variant="danger">{offerError}</Alert>}
+      {offerSuccess && <Alert variant="success">{offerSuccess}</Alert>}
+
       <Row className="g-4 align-items-stretch">
         <Col lg={6}>
-                {subasta.img_subastas && subasta.img_subastas.length > 0 ? (
-                        <img 
-                            src={subasta.img_subastas[0].url} 
-                            alt={subasta.nombre_refaccion} 
-                            className="img-fluid rounded mb-3 auction-card-img"
-                            style={{ height: '100%', width: '100%', objectFit: 'cover' }}
-                        />
-                    ) : (
-                        <div 
-                            className="d-flex align-items-center justify-content-center bg-dark rounded mb-3 text-white-50 border border-secondary"
-                            style={{ height: '180px', width: '100%' }}
-                        >
-                            <span className="small">Sin imagen disponible</span>
-                        </div>
-                    )}  
+          {subasta.img_subastas && subasta.img_subastas.length > 0 ? (
+            <img
+              src={subasta.img_subastas[0].url}
+              alt={subasta.nombre_refaccion}
+              className="img-fluid rounded mb-3 auction-card-img"
+              style={{ height: '100%', width: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <div
+              className="d-flex align-items-center justify-content-center bg-dark rounded mb-3 text-white-50 border border-secondary"
+              style={{ height: '180px', width: '100%' }}
+            >
+              <span className="small">Sin imagen disponible</span>
+            </div>
+          )}
         </Col>
 
         <Col lg={6}>
@@ -183,11 +260,11 @@ export default function AuctionDetail() {
               </div>
 
               <Button onClick={handleMakeOfferClick} className="btn-primary-custom w-100 mb-3">
-                Hacer oferta
+                Hacer puja
               </Button>
 
               <p className="small text-white-50 text-center mb-0">
-                Revisa la información antes de realizar una oferta.
+                Revisa la información antes de realizar una puja.
               </p>
             </Card.Body>
           </Card>
@@ -199,9 +276,7 @@ export default function AuctionDetail() {
           <Card className="glass-panel text-white border-0 h-100">
             <Card.Body className="p-4">
               <h3 className="fw-bold mb-3">Descripción de la refacción</h3>
-              <p className="text-white-50 mb-0 lh-lg">
-                {subasta.descripcion_problema}
-              </p>
+              <p className="text-white-50 mb-0 lh-lg">{subasta.descripcion_problema}</p>
             </Card.Body>
           </Card>
         </Col>
@@ -212,7 +287,7 @@ export default function AuctionDetail() {
               <h3 className="fw-bold mb-3">Resumen</h3>
 
               <div className="d-flex justify-content-between border-bottom border-secondary py-2">
-                <span className="text-white-50">Ofertas recibidas</span>
+                <span className="text-white-50">Pujas recibidas</span>
                 <strong>{subasta.ofertas_count || 0}</strong>
               </div>
 
@@ -229,6 +304,42 @@ export default function AuctionDetail() {
           </Card>
         </Col>
       </Row>
+
+      <Modal
+        show={showOfferModal}
+        onHide={() => setShowOfferModal(false)}
+        centered
+        contentClassName="bg-dark text-white border-0 shadow-lg"
+      >
+        <Modal.Header closeButton closeVariant="white" className="border-0 pb-0 px-4 pt-4">
+          <Modal.Title className="fw-bold fs-3">Hacer puja</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body className="px-4 pb-4 pt-2">
+          <p className="text-white-50 mb-4">
+            Ingresa los datos de tu puja para {subasta.nombre_refaccion}.
+          </p>
+
+          <Form onSubmit={handleSubmitOffer}>
+            <Form.Group className="mb-3">
+              <Form.Label>Precio ofertado</Form.Label>
+              <Form.Control
+                type="number"
+                min="1"
+                step="0.01"
+                value={pujaForm.precio_ofertado}
+                onChange={(e) => handleOfferChange('precio_ofertado', e.target.value)}
+                required
+                className="form-control-custom"
+              />
+            </Form.Group>
+            
+            <Button type="submit" className="btn-primary-custom w-100 py-3" disabled={savingOffer}>
+              {savingOffer ? 'Guardando puja...' : 'Enviar puja'}
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </Container>
   )
 }

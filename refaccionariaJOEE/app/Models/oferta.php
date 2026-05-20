@@ -8,6 +8,7 @@ class oferta extends Model
 {
     protected $table = 'ofertas';
     protected $primaryKey = 'id';
+
     protected $fillable = [
         'subasta_id',
         'proveedor_id',
@@ -18,4 +19,13 @@ class oferta extends Model
         'es_aceptada',
         'fecha_oferta',
     ];
+
+    public function subasta()
+    {
+        return $this->belongsTo(subasta::class, 'subasta_id');
+    }
+    public function proveedor()
+    {
+        return $this->belongsTo(User::class, 'proveedor_id');
+    }
 }

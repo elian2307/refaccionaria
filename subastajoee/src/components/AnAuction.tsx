@@ -1,5 +1,6 @@
 import { Col, Card, Badge } from 'react-bootstrap';
-import { Link, useOutletContext } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
+import { getToken, getUser } from '../services/auth';
 
 interface ImgSubasta {
     id?: number;
@@ -19,7 +20,6 @@ interface AuctionProps {
     offersCount?: number;
     expirationDate: string;
     img_subastas?: ImgSubasta[];
-
 }
 
 const getUrgencyColor = (urgency: string) => {
@@ -48,8 +48,11 @@ const formatText = (value: string) => {
 
 const formatDate = (value: string) => {
     if (!value) return 'No especificada';
+
     const date = new Date(value);
+
     if (Number.isNaN(date.getTime())) return value;
+
     return date.toLocaleDateString('es-MX', {
         day: '2-digit',
         month: 'short',
@@ -75,15 +78,35 @@ export default function AnAuction({
     expirationDate,
     img_subastas
 }: AuctionProps) {
+    const navigate = useNavigate();
+
     const context = useOutletContext<{ handleShowLogin?: () => void }>();
     const handleShowLogin = context?.handleShowLogin;
 
     const handleMakeOfferClick = () => {
-        const token = localStorage.getItem('token');
-        if (!token && handleShowLogin) {
-            handleShowLogin();
+        const token = getToken();
+
+        if (!token) {
+            if (handleShowLogin) {
+                handleShowLogin();
+            }
+
             return;
         }
+
+        const user = getUser();
+
+        if (user?.rol !== 'comprador' && user?.rol !== 'admin') {
+            alert('Solo los compradores pueden hacer pujas.');
+            return;
+        }
+
+        if (status !== 'abierta') {
+            alert('Esta subasta no está abierta, por eso no se puede hacer una puja.');
+            return;
+        }
+
+        navigate(`/auctions/${slug}`);
     };
 
     return (
@@ -97,6 +120,7 @@ export default function AnAuction({
                                 {brand} {model} {anio}
                             </p>
                         </div>
+
                         <Badge bg={getUrgencyColor(urgency)} className="rounded-pill px-3 py-2">
                             {formatText(urgency)}
                         </Badge>
@@ -105,21 +129,20 @@ export default function AnAuction({
 
                 <Card.Body className="d-flex flex-column p-4">
                     {img_subastas && img_subastas.length > 0 ? (
-                        <img 
-                            src={img_subastas[0].url} 
-                            alt={name} 
+                        <img
+                            src={img_subastas[0].url}
+                            alt={name}
                             className="img-fluid rounded mb-3 auction-card-img"
                             style={{ height: '180px', width: '100%', objectFit: 'cover' }}
                         />
                     ) : (
-                        <div 
+                        <div
                             className="d-flex align-items-center justify-content-center bg-dark rounded mb-3 text-white-50 border border-secondary"
                             style={{ height: '180px', width: '100%' }}
                         >
                             <span className="small">Sin imagen disponible</span>
                         </div>
                     )}
-
 
                     <div className="mb-3">
                         <Badge bg={getStatusColor(status)} className="rounded-pill px-3 py-2">
@@ -149,6 +172,7 @@ export default function AnAuction({
                         <Link to={`/auctions/${slug}`} className="btn auction-action-btn auction-action-secondary">
                             Ver detalles
                         </Link>
+
                         <button onClick={handleMakeOfferClick} className="btn auction-action-btn auction-action-primary">
                             Pujar / Hacer Oferta
                         </button>

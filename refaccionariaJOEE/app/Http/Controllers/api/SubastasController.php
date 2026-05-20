@@ -5,7 +5,6 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\subasta;
-use App\Models\User;
 
 class SubastasController extends Controller
 {
@@ -20,6 +19,40 @@ class SubastasController extends Controller
         ], 200);
     }
 
+    public function misSubastas()
+    {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        if (!in_array($user->rol, ['vendedor', 'admin'])) {
+            return response([
+                'success' => false,
+                'msg' => 'No tienes permiso para ver subastas publicadas'
+            ], 403);
+        }
+
+        $query = subasta::with('img_subastas')
+        ->withCount('ofertas')
+        ->orderBy('created_at', 'desc');
+
+        if ($user->rol !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
+
+        $subastas = $query->get();
+
+        return response([
+            'success' => true,
+            'subastas' => $subastas
+        ], 200);
+    }
+
     public function create()
     {
         return response([
@@ -30,8 +63,23 @@ class SubastasController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        if (!in_array($user->rol, ['vendedor', 'admin'])) {
+            return response([
+                'success' => false,
+                'msg' => 'Solo los vendedores pueden crear subastas'
+            ], 403);
+        }
+
         $validateData = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'marca_vehiculo' => 'required|string|max:255',
             'modelo_vehiculo' => 'required|string|max:255',
             'anio_vehiculo' => 'required|integer',
@@ -42,19 +90,17 @@ class SubastasController extends Controller
             'fecha_expiracion' => 'required|date',
         ]);
 
+        $validateData['user_id'] = $user->id;
+
         $subasta = subasta::create($validateData);
 
-        $user = User::find($validateData['user_id']);
-
-        if ($user) {
-            $user->agregarPuntosGamificacion(25);
-        }
+        $user->agregarPuntosGamificacion(25);
 
         return response([
             'success' => true,
-            'msg' => 'Subasta created successfully',
+            'msg' => 'Subasta creada correctamente',
             'subasta' => $subasta,
-            'gamificacion' => $user ? $user->resumenGamificacion() : null
+            'gamificacion' => $user->resumenGamificacion()
         ], 201);
     }
 
@@ -95,6 +141,22 @@ class SubastasController extends Controller
 
     public function update(Request $request, string $id)
     {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        if (!in_array($user->rol, ['vendedor', 'admin'])) {
+            return response([
+                'success' => false,
+                'msg' => 'Solo los vendedores pueden editar subastas'
+            ], 403);
+        }
+
         $subasta = subasta::find($id);
 
         if (!$subasta) {
@@ -104,8 +166,14 @@ class SubastasController extends Controller
             ], 404);
         }
 
+        if ($user->rol !== 'admin' && $subasta->user_id !== $user->id) {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes editar una subasta que no es tuya'
+            ], 403);
+        }
+
         $validateData = $request->validate([
-            'user_id' => 'sometimes|required|exists:users,id',
             'marca_vehiculo' => 'sometimes|required|string|max:255',
             'modelo_vehiculo' => 'sometimes|required|string|max:255',
             'anio_vehiculo' => 'sometimes|required|integer',
@@ -120,13 +188,29 @@ class SubastasController extends Controller
 
         return response([
             'success' => true,
-            'msg' => 'Subasta updated successfully',
+            'msg' => 'Subasta actualizada correctamente',
             'subasta' => $subasta
         ], 200);
     }
 
     public function destroy(string $id)
     {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        if (!in_array($user->rol, ['vendedor', 'admin'])) {
+            return response([
+                'success' => false,
+                'msg' => 'Solo los vendedores pueden eliminar subastas'
+            ], 403);
+        }
+
         $subasta = subasta::find($id);
 
         if (!$subasta) {
@@ -136,11 +220,18 @@ class SubastasController extends Controller
             ], 404);
         }
 
+        if ($user->rol !== 'admin' && $subasta->user_id !== $user->id) {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes eliminar una subasta que no es tuya'
+            ], 403);
+        }
+
         $subasta->delete();
 
         return response([
             'success' => true,
-            'msg' => 'Subasta deleted successfully'
+            'msg' => 'Subasta eliminada correctamente'
         ], 200);
     }
 }

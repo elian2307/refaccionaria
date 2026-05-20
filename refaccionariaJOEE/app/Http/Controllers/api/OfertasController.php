@@ -5,13 +5,13 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\oferta;
-use App\Models\User;
+use App\Models\subasta;
+use App\Models\pedido;
+use Illuminate\Support\Facades\DB;
+
 
 class OfertasController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $ofertas = oferta::all();
@@ -23,9 +23,85 @@ class OfertasController extends Controller
         ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    public function misOfertas()
+{
+    $user = auth('api')->user();
+
+    if (!$user) {
+        return response([
+            'success' => false,
+            'msg' => 'Usuario no autenticado'
+        ], 401);
+    }
+
+    if (!in_array($user->rol, ['comprador', 'admin'])) {
+        return response([
+            'success' => false,
+            'msg' => 'Solo los compradores pueden ver sus pujas realizadas'
+        ], 403);
+    }
+
+    $query = oferta::with('subasta')
+        ->orderBy('created_at', 'desc');
+
+    if ($user->rol !== 'admin') {
+        $query->where('proveedor_id', $user->id);
+    }
+
+    $ofertas = $query->get();
+
+    return response([
+        'success' => true,
+        'ofertas' => $ofertas
+    ], 200);
+    }
+
+    public function ofertasPorSubasta(string $id)
+    {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        if (!in_array($user->rol, ['vendedor', 'admin'])) {
+            return response([
+                'success' => false,
+                'msg' => 'Solo los vendedores pueden ver las pujas recibidas'
+            ], 403);
+        }
+
+        $subasta = subasta::find($id);
+
+        if (!$subasta) {
+            return response([
+                'success' => false,
+                'msg' => 'Subasta not found'
+            ], 404);
+        }
+
+        if ($user->rol !== 'admin' && $subasta->user_id !== $user->id) {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes ver pujas de una subasta que no es tuya'
+            ], 403);
+        }
+
+        $ofertas = oferta::with('proveedor:id,nombre,apellidos,email,rol')
+            ->where('subasta_id', $subasta->id)
+            ->orderBy('precio_ofertado', 'desc')
+            ->get();
+
+        return response([
+            'success' => true,
+            'subasta' => $subasta,
+            'ofertas' => $ofertas
+        ], 200);
+    }
+
     public function create()
     {
         return response([
@@ -34,41 +110,82 @@ class OfertasController extends Controller
         ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        if (!in_array($user->rol, ['comprador', 'admin'])) {
+            return response([
+                'success' => false,
+                'msg' => 'Solo los compradores pueden hacer pujas'
+            ], 403);
+        }
+
         $validateData = $request->validate([
-            'subasta_id' => 'required|exists:subastas,id',
-            'proveedor_id' => 'required|exists:users,id',
-            'precio_ofertado' => 'required|numeric',
-            'dias_entrega' => 'required|integer',
-            'condicion_pieza' => 'required|string|max:255',
-            'meses_garantia' => 'nullable|integer',
-            'es_aceptada' => 'nullable|boolean',
-            'fecha_oferta' => 'required|date',
+        'subasta_id' => 'required|exists:subastas,id',
+        'precio_ofertado' => 'required|numeric|min:0.01',
         ]);
+
+        $subasta = subasta::find($validateData['subasta_id']);
+
+        if (!$subasta) {
+            return response([
+                'success' => false,
+                'msg' => 'Subasta not found'
+            ], 404);
+        }
+
+        if ($subasta->estado !== 'abierta') {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes pujar en una subasta que no está abierta'
+            ], 422);
+        }
+
+        if ($subasta->user_id === $user->id) {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes pujar en tu propia subasta'
+            ], 403);
+        }
+
+        $pujaMayor = oferta::where('subasta_id', $subasta->id)
+            ->max('precio_ofertado');
+
+        if ($pujaMayor !== null && $validateData['precio_ofertado'] <= $pujaMayor) {
+            return response([
+                'success' => false,
+                'msg' => 'Tu puja debe ser mayor a la puja actual',
+                'puja_actual' => $pujaMayor
+            ], 422);
+        }
+
+        $validateData['proveedor_id'] = $user->id;
+        $validateData['dias_entrega'] = 1;
+        $validateData['condicion_pieza'] = 'nueva';
+        $validateData['meses_garantia'] = 0;
+        $validateData['es_aceptada'] = false;
+        $validateData['fecha_oferta'] = now();
 
         $oferta = oferta::create($validateData);
 
-        $user = User::find($validateData['proveedor_id']);
-
-        if ($user) {
-            $user->agregarPuntosGamificacion(15);
-        }
+        $user->agregarPuntosGamificacion(15);
 
         return response([
             'success' => true,
-            'msg' => 'Oferta created successfully',
+            'msg' => 'Puja realizada correctamente',
             'oferta' => $oferta,
-            'gamificacion' => $user ? $user->resumenGamificacion() : null
+            'gamificacion' => $user->resumenGamificacion()
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $oferta = oferta::find($id);
@@ -86,9 +203,6 @@ class OfertasController extends Controller
         ], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         $oferta = oferta::find($id);
@@ -106,12 +220,108 @@ class OfertasController extends Controller
             'oferta' => $oferta
         ], 200);
     }
+    public function aceptarOferta(string $id)
+    {
+    $user = auth('api')->user();
 
-    /**
-     * Update the specified resource in storage.
-     */
+    if (!$user) {
+        return response([
+            'success' => false,
+            'msg' => 'Usuario no autenticado'
+        ], 401);
+    }
+
+    if (!in_array($user->rol, ['vendedor', 'admin'])) {
+        return response([
+            'success' => false,
+            'msg' => 'Solo los vendedores pueden aceptar pujas'
+        ], 403);
+    }
+
+    $oferta = oferta::with('subasta')->find($id);
+
+    if (!$oferta) {
+        return response([
+            'success' => false,
+            'msg' => 'Oferta not found'
+        ], 404);
+    }
+
+    if (!$oferta->subasta) {
+        return response([
+            'success' => false,
+            'msg' => 'La oferta no tiene una subasta relacionada'
+        ], 404);
+    }
+
+    if ($user->rol !== 'admin' && $oferta->subasta->user_id !== $user->id) {
+        return response([
+            'success' => false,
+            'msg' => 'No puedes aceptar una puja de una subasta que no es tuya'
+        ], 403);
+    }
+
+    if ($oferta->subasta->estado === 'finalizada') {
+        return response([
+            'success' => false,
+            'msg' => 'Esta subasta ya fue finalizada'
+        ], 422);
+    }
+
+    $pedido = null;
+
+    DB::transaction(function () use ($oferta, &$pedido) {
+        oferta::where('subasta_id', $oferta->subasta_id)
+            ->update(['es_aceptada' => false]);
+
+        $oferta->update([
+            'es_aceptada' => true
+        ]);
+
+        $oferta->subasta->update([
+            'estado' => 'finalizada'
+        ]);
+
+        $montoTotal = $oferta->precio_ofertado;
+        $montoComision = $montoTotal * 0.05;
+
+        $pedido = pedido::updateOrCreate(
+            [
+                'subasta_id' => $oferta->subasta_id,
+                'oferta_id' => $oferta->id,
+            ],
+            [
+                'monto_total' => $montoTotal,
+                'monto_comision' => $montoComision,
+                'estado_pago' => 'pendiente',
+                'estado_envio' => 'pendiente',
+                'numero_rastreo' => 'Pendiente',
+                'fecha_pedido' => now(),
+            ]
+        );
+    });
+
+    $oferta->load(['subasta', 'proveedor']);
+    $pedido->load(['subasta', 'oferta']);
+
+    return response([
+        'success' => true,
+        'msg' => 'Puja aceptada y pedido creado correctamente',
+        'oferta' => $oferta,
+        'pedido' => $pedido
+    ], 200);
+    }
     public function update(Request $request, string $id)
     {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
         $oferta = oferta::find($id);
 
         if (!$oferta) {
@@ -121,31 +331,40 @@ class OfertasController extends Controller
             ], 404);
         }
 
+        if ($user->rol !== 'admin' && $oferta->proveedor_id !== $user->id) {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes editar una puja que no es tuya'
+            ], 403);
+        }
+
         $validateData = $request->validate([
-            'subasta_id' => 'sometimes|required|exists:subastas,id',
-            'proveedor_id' => 'sometimes|required|exists:users,id',
-            'precio_ofertado' => 'sometimes|required|numeric',
-            'dias_entrega' => 'sometimes|required|integer',
-            'condicion_pieza' => 'sometimes|required|string|max:255',
-            'meses_garantia' => 'nullable|integer',
-            'es_aceptada' => 'nullable|boolean',
-            'fecha_oferta' => 'sometimes|required|date',
+            'precio_ofertado' => 'sometimes|required|numeric|min:0.01',
+            'dias_entrega' => 'sometimes|required|integer|min:1',
+            'condicion_pieza' => 'sometimes|required|in:nueva,usada,reconstruida',
+            'meses_garantia' => 'nullable|integer|min:0',
         ]);
 
         $oferta->update($validateData);
 
         return response([
             'success' => true,
-            'msg' => 'Oferta updated successfully',
+            'msg' => 'Puja actualizada correctamente',
             'oferta' => $oferta
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
         $oferta = oferta::find($id);
 
         if (!$oferta) {
@@ -155,11 +374,18 @@ class OfertasController extends Controller
             ], 404);
         }
 
+        if ($user->rol !== 'admin' && $oferta->proveedor_id !== $user->id) {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes eliminar una puja que no es tuya'
+            ], 403);
+        }
+
         $oferta->delete();
 
         return response([
             'success' => true,
-            'msg' => 'Oferta deleted successfully'
+            'msg' => 'Puja eliminada correctamente'
         ], 200);
     }
 }

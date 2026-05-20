@@ -8,6 +8,7 @@ class pedido extends Model
 {
     protected $table = 'pedidos';
     protected $primaryKey = 'id';
+
     protected $fillable = [
         'subasta_id',
         'oferta_id',
@@ -18,4 +19,14 @@ class pedido extends Model
         'numero_rastreo',
         'fecha_pedido',
     ];
+
+    public function subasta()
+    {
+        return $this->belongsTo(subasta::class, 'subasta_id');
+    }
+
+    public function oferta()
+    {
+        return $this->belongsTo(oferta::class, 'oferta_id');
+    }
 }

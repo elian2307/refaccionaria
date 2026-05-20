@@ -1,47 +1,353 @@
-import { Row, Col, Card, Badge } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
+import { Alert, Badge, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { apiAuth } from '../../services/api';
+import { getUser } from '../../services/auth';
+
+interface Comprador {
+    id: number;
+    nombre?: string;
+    apellidos?: string;
+    email?: string;
+    rol?: string;
+}
+
+interface Subasta {
+    id: number;
+    slug?: string;
+    user_id: number;
+    marca_vehiculo: string;
+    modelo_vehiculo: string;
+    anio_vehiculo: number;
+    nombre_refaccion: string;
+    estado: string;
+}
+
+interface Oferta {
+    id: number;
+    subasta_id: number;
+    proveedor_id: number;
+    precio_ofertado: number | string;
+    es_aceptada?: boolean;
+    proveedor?: Comprador;
+}
+
+interface Pedido {
+    id: number;
+    subasta_id: number;
+    oferta_id: number;
+    monto_total: number | string;
+    monto_comision: number | string;
+    estado_pago: string;
+    estado_envio: string;
+    numero_rastreo: string;
+    fecha_pedido: string;
+    created_at: string;
+    subasta?: Subasta;
+    oferta?: Oferta;
+}
 
 export default function MisPedidos() {
-    const pedidos = [
-        { id: 'ORD-001', refaccion: 'Amortiguadores', proveedor: 'Refaccionaria El Pistón', total: '$2,500 MXN', fecha: '2026-05-11', estado: 'en_camino' },
-        { id: 'ORD-002', refaccion: 'Filtro de Aceite', proveedor: 'AutoParts Express', total: '$350 MXN', fecha: '2026-05-01', estado: 'entregado' }
-    ];
+    const [pedidos, setPedidos] = useState<Pedido[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+    const [actualizandoPedidoId, setActualizandoPedidoId] = useState<number | null>(null);
 
-    const getEstadoBadge = (estado: string) => {
-        switch(estado) {
-            case 'entregado': return 'info'; // Success color
-            case 'en_camino': return 'warning'; // Pending color
-            case 'cancelado': return 'danger';
-            default: return 'secondary';
+    const user = getUser();
+    const puedeActualizar = user?.rol === 'vendedor' || user?.rol === 'admin';
+
+    const cargarPedidos = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await apiAuth.get('/pedido');
+
+            if (response.data.success) {
+                setPedidos(response.data.pedidos || []);
+            } else {
+                setError('No se pudieron cargar tus órdenes.');
+            }
+        } catch (err: any) {
+            setError(err.response?.data?.msg || 'No se pudieron cargar tus órdenes.');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const formatEstado = (estado: string) => estado.replace('_', ' ').toUpperCase();
+    useEffect(() => {
+        cargarPedidos();
+    }, []);
+
+    const actualizarCampoPedido = (pedidoId: number, field: keyof Pedido, value: string) => {
+        setPedidos((current) =>
+            current.map((pedido) =>
+                pedido.id === pedidoId
+                    ? {
+                        ...pedido,
+                        [field]: value,
+                    }
+                    : pedido
+            )
+        );
+    };
+
+    const guardarCambiosPedido = async (pedido: Pedido) => {
+        try {
+            setActualizandoPedidoId(pedido.id);
+            setError(null);
+            setSuccess(null);
+
+            await apiAuth.put(`/pedido/${pedido.id}`, {
+                estado_pago: pedido.estado_pago,
+                estado_envio: pedido.estado_envio,
+                numero_rastreo: pedido.numero_rastreo || 'Pendiente',
+            });
+
+            setSuccess('Orden actualizada correctamente.');
+            cargarPedidos();
+        } catch (err: any) {
+            setError(err.response?.data?.msg || 'No se pudo actualizar la orden.');
+        } finally {
+            setActualizandoPedidoId(null);
+        }
+    };
+
+    const getEnvioBadge = (estado: string) => {
+        switch (estado) {
+            case 'entregado':
+                return 'success';
+            case 'enviado':
+                return 'warning';
+            case 'pendiente':
+                return 'secondary';
+            default:
+                return 'secondary';
+        }
+    };
+
+    const getPagoBadge = (estado: string) => {
+        switch (estado) {
+            case 'pagado':
+                return 'success';
+            case 'reembolsado':
+                return 'danger';
+            case 'pendiente':
+                return 'warning';
+            default:
+                return 'secondary';
+        }
+    };
+
+    const formatEstado = (estado: string) => {
+        if (!estado) return 'NO DISPONIBLE';
+        return estado.replace('_', ' ').toUpperCase();
+    };
+
+    const formatCurrency = (value: number | string) => {
+        const amount = Number(value);
+
+        if (Number.isNaN(amount)) {
+            return `$${value} MXN`;
+        }
+
+        return amount.toLocaleString('es-MX', {
+            style: 'currency',
+            currency: 'MXN',
+        });
+    };
+
+    const formatFecha = (value?: string) => {
+        if (!value) return 'No disponible';
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return value;
+        }
+
+        return date.toLocaleDateString('es-MX', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+        });
+    };
+
+    const nombreComprador = (pedido: Pedido) => {
+        const comprador = pedido.oferta?.proveedor;
+
+        if (comprador?.nombre) {
+            return `${comprador.nombre} ${comprador.apellidos || ''}`.trim();
+        }
+
+        if (comprador?.email) {
+            return comprador.email;
+        }
+
+        return `Usuario #${pedido.oferta?.proveedor_id || 'N/A'}`;
+    };
+
+    if (loading) {
+        return (
+            <div className="text-center py-5">
+                <Spinner animation="border" variant="primary" />
+                <p className="text-white-50 mt-3">Cargando tus órdenes...</p>
+            </div>
+        );
+    }
 
     return (
         <div>
-            <h3 className="mb-4">Mis Órdenes</h3>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h3 className="mb-0">Mis Órdenes</h3>
+
+                <Button onClick={cargarPedidos} className="btn btn-outline-custom">
+                    Actualizar
+                </Button>
+            </div>
+
+            {success && <Alert variant="success">{success}</Alert>}
+            {error && <Alert variant="danger">{error}</Alert>}
+
+            {!error && pedidos.length === 0 && (
+                <Alert variant="info">
+                    Todavía no tienes órdenes. Las órdenes se generan cuando un vendedor acepta una puja.
+                </Alert>
+            )}
+
             <Row className="g-4">
-                {pedidos.map(pedido => (
+                {pedidos.map((pedido) => (
                     <Col xs={12} key={pedido.id}>
                         <Card className="glass-panel text-white border-0 p-4">
-                            <Row className="align-items-center">
-                                <Col md={3}>
-                                    <small className="text-muted d-block">ID Órden</small>
-                                    <strong className="text-primary">{pedido.id}</strong>
+                            <Row className="align-items-start g-3">
+                                <Col md={2}>
+                                    <small className="text-white-50 d-block">ID Orden</small>
+                                    <strong className="text-primary">ORD-{pedido.id}</strong>
                                 </Col>
+
                                 <Col md={3}>
-                                    <small className="text-muted d-block">Artículo</small>
-                                    <strong>{pedido.refaccion}</strong>
+                                    <small className="text-white-50 d-block">Artículo</small>
+                                    <strong>
+                                        {pedido.subasta?.nombre_refaccion || `Subasta #${pedido.subasta_id}`}
+                                    </strong>
+
+                                    <p className="text-white-50 small mb-0 mt-1">
+                                        {pedido.subasta
+                                            ? `${pedido.subasta.marca_vehiculo} ${pedido.subasta.modelo_vehiculo} ${pedido.subasta.anio_vehiculo}`
+                                            : 'Información no disponible'}
+                                    </p>
                                 </Col>
+
+                                <Col md={2}>
+                                    <small className="text-white-50 d-block">Comprador</small>
+                                    <strong>{nombreComprador(pedido)}</strong>
+                                    <p className="text-white-50 small mb-0 mt-1">
+                                        {pedido.oferta?.proveedor?.email || 'Correo no disponible'}
+                                    </p>
+                                </Col>
+
+                                <Col md={2}>
+                                    <small className="text-white-50 d-block">Total</small>
+                                    <strong className="text-primary fs-5">
+                                        {formatCurrency(pedido.monto_total)}
+                                    </strong>
+
+                                    <p className="text-white-50 small mb-0 mt-1">
+                                        Comisión: {formatCurrency(pedido.monto_comision)}
+                                    </p>
+                                </Col>
+
+                                <Col md={3} className="text-md-end">
+                                    <div className="mb-2">
+                                        <Badge bg={getPagoBadge(pedido.estado_pago)} className="px-3 py-2 rounded-pill me-2">
+                                            Pago: {formatEstado(pedido.estado_pago)}
+                                        </Badge>
+
+                                        <Badge bg={getEnvioBadge(pedido.estado_envio)} className="px-3 py-2 rounded-pill">
+                                            Envío: {formatEstado(pedido.estado_envio)}
+                                        </Badge>
+                                    </div>
+
+                                    <small className="text-white-50 d-block">Fecha</small>
+                                    <strong>{formatFecha(pedido.fecha_pedido || pedido.created_at)}</strong>
+                                </Col>
+                            </Row>
+
+                            <hr className="border-secondary my-4" />
+
+                            <Row className="align-items-end g-3">
                                 <Col md={3}>
-                                    <small className="text-muted d-block">Proveedor</small>
-                                    <strong>{pedido.proveedor}</strong>
+                                    <small className="text-white-50 d-block mb-1">Número de rastreo</small>
+
+                                    {puedeActualizar ? (
+                                        <Form.Control
+                                            type="text"
+                                            value={pedido.numero_rastreo || ''}
+                                            onChange={(e) => actualizarCampoPedido(pedido.id, 'numero_rastreo', e.target.value)}
+                                            className="form-control-custom"
+                                            placeholder="Pendiente"
+                                        />
+                                    ) : (
+                                        <strong>{pedido.numero_rastreo || 'Pendiente'}</strong>
+                                    )}
                                 </Col>
-                                <Col md={3} className="text-md-end mt-3 mt-md-0">
-                                    <Badge bg={getEstadoBadge(pedido.estado)} className="px-3 py-2 rounded-pill mb-2">
-                                        {formatEstado(pedido.estado)}
-                                    </Badge>
-                                    <h5 className="mb-0">{pedido.total}</h5>
+
+                                <Col md={3}>
+                                    <small className="text-white-50 d-block mb-1">Estado de pago</small>
+
+                                    {puedeActualizar ? (
+                                        <Form.Select
+                                            value={pedido.estado_pago}
+                                            onChange={(e) => actualizarCampoPedido(pedido.id, 'estado_pago', e.target.value)}
+                                            className="form-control-custom"
+                                        >
+                                            <option value="pendiente">Pendiente</option>
+                                            <option value="pagado">Pagado</option>
+                                            <option value="reembolsado">Reembolsado</option>
+                                        </Form.Select>
+                                    ) : (
+                                        <strong>{formatEstado(pedido.estado_pago)}</strong>
+                                    )}
+                                </Col>
+
+                                <Col md={3}>
+                                    <small className="text-white-50 d-block mb-1">Estado de envío</small>
+
+                                    {puedeActualizar ? (
+                                        <Form.Select
+                                            value={pedido.estado_envio}
+                                            onChange={(e) => actualizarCampoPedido(pedido.id, 'estado_envio', e.target.value)}
+                                            className="form-control-custom"
+                                        >
+                                            <option value="pendiente">Pendiente</option>
+                                            <option value="enviado">Enviado</option>
+                                            <option value="entregado">Entregado</option>
+                                        </Form.Select>
+                                    ) : (
+                                        <strong>{formatEstado(pedido.estado_envio)}</strong>
+                                    )}
+                                </Col>
+
+                                <Col md={3} className="d-flex gap-2">
+                                    {pedido.subasta?.slug && (
+                                        <Link
+                                            to={`/auctions/${pedido.subasta.slug}`}
+                                            className="btn btn-outline-custom w-100"
+                                        >
+                                            Ver subasta
+                                        </Link>
+                                    )}
+
+                                    {puedeActualizar && (
+                                        <Button
+                                            className="btn-primary-custom w-100"
+                                            onClick={() => guardarCambiosPedido(pedido)}
+                                            disabled={actualizandoPedidoId === pedido.id}
+                                        >
+                                            {actualizandoPedidoId === pedido.id ? 'Guardando...' : 'Guardar'}
+                                        </Button>
+                                    )}
                                 </Col>
                             </Row>
                         </Card>

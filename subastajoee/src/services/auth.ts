@@ -1,125 +1,126 @@
 import { api, apiAuth } from './api';
 
 export interface User {
-  id: number;
-  name: string;
-  email: string;
-  created_at?: string;
-  updated_at?: string;
+    id: number;
+    nombre?: string;
+    apellidos?: string | null;
+    name?: string;
+    email: string;
+    rol?: string;
+    tipo_usuario?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export interface LoginCredentials {
-  email: string;
-  password?: string;
+    email: string;
+    password?: string;
 }
 
 export interface LoginResponse {
-  token: string;
-  user: User;
-  expires_in?: number;
+    success?: boolean;
+    token: string;
+    user: User;
+    expires_in?: number;
+    msg?: string;
 }
 
-const TOKEN_KEY = 'acme_token';
-const USER_KEY = 'acme_user';
+const TOKEN_KEY = 'token';
+const USER_KEY = 'user';
 
-/**
- * Gets the token from localStorage or sessionStorage.
- */
+const OLD_TOKEN_KEY = 'acme_token';
+const OLD_USER_KEY = 'acme_user';
+
 export const getToken = (): string | null => {
-  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+    return (
+        localStorage.getItem(TOKEN_KEY) ||
+        sessionStorage.getItem(TOKEN_KEY) ||
+        localStorage.getItem(OLD_TOKEN_KEY) ||
+        sessionStorage.getItem(OLD_TOKEN_KEY)
+    );
 };
 
-/**
- * Gets the current user from localStorage or sessionStorage.
- */
 export const getUser = (): User | null => {
-  const userStr = localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY);
-  if (!userStr) return null;
-  try {
-    return JSON.parse(userStr);
-  } catch (e) {
-    console.error('Failed to parse stored user:', e);
-    return null;
-  }
+    const userStr =
+        localStorage.getItem(USER_KEY) ||
+        sessionStorage.getItem(USER_KEY) ||
+        localStorage.getItem(OLD_USER_KEY) ||
+        sessionStorage.getItem(OLD_USER_KEY);
+
+    if (!userStr) return null;
+
+    try {
+        return JSON.parse(userStr);
+    } catch (e) {
+        console.error('Error al leer el usuario guardado:', e);
+        return null;
+    }
 };
 
-/**
- * Checks if a token is present in storage.
- */
 export const isAuthenticated = (): boolean => {
-  return !!getToken();
+    return !!getToken();
 };
 
-/**
- * Sets the active session in either localStorage or sessionStorage.
- */
-export const setSession = (token: string, user: User, remember: boolean): void => {
-  if (remember) {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-    // Clean up sessionStorage to prevent session duplicates
-    sessionStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(USER_KEY);
-  } else {
-    sessionStorage.setItem(TOKEN_KEY, token);
-    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
-    // Clean up localStorage to prevent persistent duplicates
+export const setSession = (token: string, user: User, remember: boolean = true): void => {
+    clearSession();
+
+    if (remember) {
+        localStorage.setItem(TOKEN_KEY, token);
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+    } else {
+        sessionStorage.setItem(TOKEN_KEY, token);
+        sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+    }
+};
+
+export const clearSession = (): void => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-  }
+    localStorage.removeItem(OLD_TOKEN_KEY);
+    localStorage.removeItem(OLD_USER_KEY);
+
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
+    sessionStorage.removeItem(OLD_TOKEN_KEY);
+    sessionStorage.removeItem(OLD_USER_KEY);
 };
 
-/**
- * Clears the session from both storages.
- */
-export const clearSession = (): void => {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
-  sessionStorage.removeItem(TOKEN_KEY);
-  sessionStorage.removeItem(USER_KEY);
-};
+export const login = async (
+    credentials: LoginCredentials,
+    remember: boolean = true
+): Promise<LoginResponse> => {
+    const response = await api.post('/login', credentials);
+    const data = response.data as LoginResponse;
 
-/**
- * Performs a login request to the Laravel backend.
- */
-export const login = async (credentials: LoginCredentials, remember: boolean = false): Promise<LoginResponse> => {
-  const response = await api.post('/login', credentials);
-  const data = response.data as LoginResponse;
-  
-  if (data.token && data.user) {
-    setSession(data.token, data.user, remember);
-  }
-  return data;
-};
-
-/**
- * Performs a logout request and clears all frontend sessions.
- */
-export const logout = async (): Promise<void> => {
-  try {
-    if (isAuthenticated()) {
-      await apiAuth.post('/logout');
+    if (data.token && data.user) {
+        setSession(data.token, data.user, remember);
     }
-  } catch (e) {
-    console.error('Logout request failed:', e);
-  } finally {
-    clearSession();
-  }
+
+    return data;
 };
 
-/**
- * Fetches the current authenticated user's details and updates the storage.
- */
+export const logout = async (): Promise<void> => {
+    try {
+        if (isAuthenticated()) {
+            await apiAuth.post('/logout');
+        }
+    } catch (e) {
+        console.error('Error al cerrar sesión:', e);
+    } finally {
+        clearSession();
+    }
+};
+
 export const getCurrentUser = async (): Promise<User> => {
-  const response = await apiAuth.get('/user');
-  const user = response.data as User;
-  
-  // Update user in whichever storage it currently exists in
-  if (localStorage.getItem(TOKEN_KEY)) {
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-  } else if (sessionStorage.getItem(TOKEN_KEY)) {
-    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
-  }
-  
-  return user;
+    const response = await apiAuth.get('/user');
+
+    const user = response.data.user as User;
+
+    if (localStorage.getItem(TOKEN_KEY)) {
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+    } else if (sessionStorage.getItem(TOKEN_KEY)) {
+        sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+    }
+
+    return user;
 };

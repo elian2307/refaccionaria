@@ -8,12 +8,36 @@ use App\Models\pedido;
 
 class PedidosController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $pedidos = pedido::all();
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        $query = pedido::with([
+            'subasta',
+            'oferta',
+            'oferta.proveedor:id,nombre,apellidos,email,rol'
+        ])->orderBy('created_at', 'desc');
+
+        if ($user->rol === 'vendedor') {
+            $query->whereHas('subasta', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        if ($user->rol === 'comprador') {
+            $query->whereHas('oferta', function ($q) use ($user) {
+                $q->where('proveedor_id', $user->id);
+            });
+        }
+
+        $pedidos = $query->get();
 
         return response([
             'success' => true,
@@ -22,9 +46,6 @@ class PedidosController extends Controller
         ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return response([
@@ -33,11 +54,24 @@ class PedidosController extends Controller
         ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        if ($user->rol !== 'admin') {
+            return response([
+                'success' => false,
+                'msg' => 'Los pedidos se crean automáticamente al aceptar una puja'
+            ], 403);
+        }
+
         $validateData = $request->validate([
             'subasta_id' => 'required|exists:subastas,id',
             'oferta_id' => 'required|exists:ofertas,id',
@@ -49,6 +83,8 @@ class PedidosController extends Controller
             'fecha_pedido' => 'required|date',
         ]);
 
+        $validateData['numero_rastreo'] = $validateData['numero_rastreo'] ?? 'Pendiente';
+
         $pedido = pedido::create($validateData);
 
         return response([
@@ -58,12 +94,22 @@ class PedidosController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        $pedido = pedido::find($id);
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        $pedido = pedido::with([
+            'subasta',
+            'oferta',
+            'oferta.proveedor:id,nombre,apellidos,email,rol'
+        ])->find($id);
 
         if (!$pedido) {
             return response([
@@ -72,15 +118,34 @@ class PedidosController extends Controller
             ], 404);
         }
 
+        if (
+            $user->rol === 'vendedor' &&
+            $pedido->subasta &&
+            $pedido->subasta->user_id !== $user->id
+        ) {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes ver un pedido que no pertenece a tus subastas'
+            ], 403);
+        }
+
+        if (
+            $user->rol === 'comprador' &&
+            $pedido->oferta &&
+            $pedido->oferta->proveedor_id !== $user->id
+        ) {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes ver un pedido que no pertenece a tus pujas'
+            ], 403);
+        }
+
         return response([
             'success' => true,
             'pedido' => $pedido
         ], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         $pedido = pedido::find($id);
@@ -99,12 +164,18 @@ class PedidosController extends Controller
         ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        $pedido = pedido::find($id);
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response([
+                'success' => false,
+                'msg' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        $pedido = pedido::with(['subasta', 'oferta'])->find($id);
 
         if (!$pedido) {
             return response([
@@ -113,16 +184,33 @@ class PedidosController extends Controller
             ], 404);
         }
 
+        if (!in_array($user->rol, ['vendedor', 'admin'])) {
+            return response([
+                'success' => false,
+                'msg' => 'Solo el vendedor puede actualizar el pedido'
+            ], 403);
+        }
+
+        if (
+            $user->rol !== 'admin' &&
+            $pedido->subasta &&
+            $pedido->subasta->user_id !== $user->id
+        ) {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes actualizar un pedido que no pertenece a tus subastas'
+            ], 403);
+        }
+
         $validateData = $request->validate([
-            'subasta_id' => 'sometimes|required|exists:subastas,id',
-            'oferta_id' => 'sometimes|required|exists:ofertas,id',
-            'monto_total' => 'sometimes|required|numeric',
-            'monto_comision' => 'sometimes|required|numeric',
-            'estado_pago' => 'sometimes|required|string|max:255',
-            'estado_envio' => 'sometimes|required|string|max:255',
+            'estado_pago' => 'sometimes|required|in:pendiente,pagado,reembolsado',
+            'estado_envio' => 'sometimes|required|in:pendiente,enviado,entregado',
             'numero_rastreo' => 'nullable|string|max:255',
-            'fecha_pedido' => 'sometimes|required|date',
         ]);
+
+        if (array_key_exists('numero_rastreo', $validateData) && !$validateData['numero_rastreo']) {
+            $validateData['numero_rastreo'] = 'Pendiente';
+        }
 
         $pedido->update($validateData);
 
@@ -133,11 +221,17 @@ class PedidosController extends Controller
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
+        $user = auth('api')->user();
+
+        if (!$user || $user->rol !== 'admin') {
+            return response([
+                'success' => false,
+                'msg' => 'Solo admin puede eliminar pedidos'
+            ], 403);
+        }
+
         $pedido = pedido::find($id);
 
         if (!$pedido) {

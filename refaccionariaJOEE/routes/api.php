@@ -26,10 +26,20 @@ Route::middleware('jwt')->group(function () {
 
     Route::get('/gamificacion', [GamificacionController::class, 'show']);
 
+    // Flujo vendedor: ver sus subastas y las pujas recibidas
+    Route::get('/mis-subastas', [SubastasController::class, 'misSubastas']);
+    Route::get('/subasta/{id}/ofertas', [OfertasController::class, 'ofertasPorSubasta']);
+
+    // Flujo cliente/comprador: ver sus pujas realizadas
+    Route::get('/mis-ofertas', [OfertasController::class, 'misOfertas']);
+
     Route::resource('users', UsersController::class);
     Route::resource('direccion', DireccionesController::class);
     Route::resource('subasta', SubastasController::class)->except(['index']);
+
+    Route::patch('/oferta/{id}/aceptar', [OfertasController::class, 'aceptarOferta']);
     Route::resource('oferta', OfertasController::class);
+
     Route::resource('pedido', PedidosController::class);
     Route::resource('resena', ResenasController::class);
     Route::resource('imgSubasta', ImgSubastasController::class);
