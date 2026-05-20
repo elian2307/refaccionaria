@@ -11,7 +11,7 @@ class SubastasController extends Controller
 {
     public function index()
     {
-        $subastas = subasta::all();
+        $subastas = subasta::with('img_subastas')->get();
 
         return response([
             'success' => true,
@@ -58,9 +58,9 @@ class SubastasController extends Controller
         ], 201);
     }
 
-    public function show(string $id)
+    public function show(string $slug)
     {
-        $subasta = subasta::find($id);
+        $subasta = subasta::with('img_subastas')->where('slug', $slug)->first();
 
         if (!$subasta) {
             return response([

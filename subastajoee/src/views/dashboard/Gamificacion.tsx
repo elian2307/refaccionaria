@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Alert, Badge, Card, Col, Container, ProgressBar, Row, Spinner } from 'react-bootstrap';
-import axios from 'axios';
-
+import { api } from '../../services/api';
 import type { GamificacionData } from '../../interfaces/Gamificacion';
 
 export default function NivelesJOEE() {
@@ -14,7 +13,7 @@ export default function NivelesJOEE() {
             try {
                 const token = localStorage.getItem('token');
 
-                const response = await axios.get('http://localhost:8000/api/gamificacion', {
+                const response = await api.get('/gamificacion', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

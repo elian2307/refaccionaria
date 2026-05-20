@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('marca_vehiculo');
             $table->string('modelo_vehiculo');
             $table->string('anio_vehiculo');
+            $table->string('slug')->unique();
             $table->string('nombre_refaccion');
             $table->string('descripcion_problema');
             $table->enum('urgencia', ['baja', 'media', 'alta'])->default('media');

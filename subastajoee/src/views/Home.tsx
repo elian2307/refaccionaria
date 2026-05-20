@@ -29,6 +29,11 @@ const featuredAuctions = [
 ];
 
 export default function Home() {
+
+    //DECLARAR LO DE LA DIRECCION DE LA API DE LARAVEL
+    //const apiUrl = import.meta.env.VITE_API_URL; 
+
+
     return (
         <div className="home-view">
             <section className="hero-section py-5 my-5">
@@ -132,6 +137,14 @@ export default function Home() {
 
             <section className="py-5">
                 <Container>
+                            
+                     <div className="text-center mb-5">
+                        <h2 className="fw-bold text-white mb-3">Subasta tus refacciones de manera sencilla</h2>
+                        <p className="text-white-50 mb-0">
+                            Tu eliges al mejor postor para tu subasta.
+                        </p>
+                    </div>
+
                     <Row className="g-4 align-items-stretch">
                         <Col lg={4}>
                             <Card className="glass-panel text-white border-0 h-100 home-info-card">

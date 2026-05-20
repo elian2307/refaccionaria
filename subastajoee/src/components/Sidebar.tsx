@@ -10,8 +10,12 @@ export default function Sidebar() {
     };
     return (
         <aside className="dashboard-sidebar">
-            <Link to="/" className="sidebar-logo">
-                <i className="fa-solid fa-car"></i>
+            <Link to="/" className="sidebar-logo makemebig">
+                <img
+                    src={`${import.meta.env.VITE_API_ASSETS}/joee/img/iso.png`}
+                    className="d-inline-block align-top inlinelogo"
+                    style={{ objectFit: 'contain' }}
+                />
                 <span>Subastas JOEE</span>
             </Link>
 
@@ -50,6 +54,12 @@ export default function Sidebar() {
                 </ul>
 
                 <ul className="sidebar-nav mb-4">
+                    <li>
+                        <NavLink to="/" className="sidebar-nav-link">
+                            <i className="fa-solid fa-house-user"></i>
+                            Ir al inicio
+                        </NavLink>
+                    </li>
                     <li>
                         <button
                             type="button"

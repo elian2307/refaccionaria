@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Badge, Spinner, Alert } from 'react-bootstrap';
-import axios from 'axios';
-import { Link, useOutletContext } from 'react-router-dom';
-
+import { Container, Row, Badge, Spinner, Alert } from 'react-bootstrap';
+import AnAuction from '../components/AnAuction';
+import { api } from '../services/api';
 import type { Subasta } from '../interfaces/Subasta';
 
 export default function Auctions() {
     const [subastas, setSubastas] = useState<Subasta[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-
-    const context = useOutletContext<{ handleShowLogin?: () => void }>();
-    const handleShowLogin = context?.handleShowLogin;
 
     useEffect(() => {
         const fetchSubastas = async () => {
@@ -23,10 +19,11 @@ export default function Auctions() {
                     }
                 } : {};
 
-                const response = await axios.get('http://localhost:8000/api/subasta', config);
+                const response = await api.get('/subasta', config);
 
                 if (response.data.success) {
                     setSubastas(response.data.subastas);
+                    console.log('Subastas obtenidas:', response.data.subastas);
                 } else {
                     setError('Error al obtener las subastas.');
                 }
@@ -41,62 +38,10 @@ export default function Auctions() {
         fetchSubastas();
     }, []);
 
-    const getUrgencyColor = (urgency: string) => {
-        switch (urgency) {
-            case 'alta': return 'danger';
-            case 'media': return 'warning';
-            case 'baja': return 'info';
-            default: return 'secondary';
-        }
-    };
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'abierta': return 'success';
-            case 'cerrada': return 'secondary';
-            case 'cancelada': return 'danger';
-            case 'finalizada': return 'primary';
-            default: return 'secondary';
-        }
-    };
-
-    const formatText = (value: string) => {
-        if (!value) return 'No especificado';
-        return value.charAt(0).toUpperCase() + value.slice(1);
-    };
-
-    const formatDate = (value: string) => {
-        if (!value) return 'No especificada';
-
-        const date = new Date(value);
-
-        if (Number.isNaN(date.getTime())) {
-            return value;
-        }
-
-        return date.toLocaleDateString('es-MX', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-        });
-    };
-
-    const shortDescription = (value: string) => {
-        if (!value) return 'Sin descripción disponible.';
-        return value.length > 115 ? `${value.slice(0, 115)}...` : value;
-    };
-
-    const handleMakeOfferClick = () => {
-        const token = localStorage.getItem('token');
-        if (!token && handleShowLogin) {
-            handleShowLogin();
-            return;
-        }
-        // Lógica de pujar
-    };
 
     return (
         <Container className="py-5 my-5">
-            <div className="d-flex justify-content-between align-items-center mb-5">
+            <div className="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-4">
                 <div>
                     <h1 className="fw-bold mb-2 text-white">Subastas de Refacciones</h1>
                     <p className="text-white-50 mb-0">Revisa las piezas publicadas y puja por ellas</p>
@@ -128,64 +73,21 @@ export default function Auctions() {
             )}
 
             <Row className="g-4">
-                {subastas.map((req) => (
-                    <Col key={req.id} xs={12} md={6} lg={4}>
-                        <Card className="glass-panel h-100 text-white border-0 auction-card">
-                            <Card.Header className="bg-transparent border-bottom border-secondary pt-4 pb-3">
-                                <div className="d-flex justify-content-between align-items-start gap-3">
-                                    <div>
-                                        <h5 className="fw-bold text-primary mb-2">
-                                            {req.nombre_refaccion}
-                                        </h5>
-
-                                        <p className="text-white-50 small mb-0">
-                                            {req.marca_vehiculo} {req.modelo_vehiculo} {req.anio_vehiculo}
-                                        </p>
-                                    </div>
-
-                                    <Badge bg={getUrgencyColor(req.urgencia)} className="rounded-pill px-3 py-2">
-                                        {formatText(req.urgencia)}
-                                    </Badge>
-                                </div>
-                            </Card.Header>
-
-                            <Card.Body className="d-flex flex-column p-4">
-                                <div className="mb-3">
-                                    <Badge bg={getStatusColor(req.estado)} className="rounded-pill px-3 py-2">
-                                        Estado: {formatText(req.estado)}
-                                    </Badge>
-                                </div>
-
-                                <p className="mb-4 small text-white-50 auction-card-description">
-                                    {shortDescription(req.descripcion_problema)}
-                                </p>
-
-                                <div className="auction-card-info mt-auto">
-                                    <div className="auction-card-info-item">
-                                        <span>Pujas recibidas</span>
-                                        <strong>{req.ofertas_count || 0}</strong>
-                                    </div>
-
-                                    <div className="auction-card-info-item">
-                                        <span>Fecha límite</span>
-                                        <strong>{formatDate(req.fecha_expiracion)}</strong>
-                                    </div>
-                                </div>
-
-                                <hr className="my-3 border-secondary" />
-
-                                <div className="auction-actions">
-                                    <Link to={`/auctions/${req.id}`} className="btn auction-action-btn auction-action-secondary">
-                                        Ver detalles
-                                    </Link>
-
-                                    <button onClick={handleMakeOfferClick} className="btn auction-action-btn auction-action-primary">
-                                        Pujar / Hacer Oferta
-                                    </button>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
+                {subastas.map((req) => (                                                                        
+                    <AnAuction 
+                        key={req.id}
+                        name={req.nombre_refaccion} 
+                        brand={req.marca_vehiculo} 
+                        model={req.modelo_vehiculo} 
+                        anio={req.anio_vehiculo} 
+                        description={req.descripcion_problema} 
+                        slug={req.slug}
+                        urgency={req.urgencia} 
+                        status={req.estado} 
+                        offersCount={req.ofertas_count} 
+                        expirationDate={req.fecha_expiracion}
+                        img_subastas={req.img_subastas} 
+                    />
                 ))}
             </Row>
         </Container>

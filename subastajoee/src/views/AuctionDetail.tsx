@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useOutletContext } from 'react-router-dom'
 import { Alert, Badge, Button, Card, Col, Container, Row, Spinner } from 'react-bootstrap'
-import axios from 'axios'
-
+import { api } from '../services/api';
 import type { Subasta } from '../interfaces/Subasta';
 
+
 export default function AuctionDetail() {
-  const { id } = useParams()
+  const { slug } = useParams()
   const [subasta, setSubasta] = useState<Subasta | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -18,7 +18,7 @@ export default function AuctionDetail() {
   useEffect(() => {
     const fetchSubasta = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/subasta/${id}`)
+        const response = await api.get(`/subasta/${slug}`)
 
         if (response.data.success) {
           setSubasta(response.data.subasta)
@@ -33,7 +33,7 @@ export default function AuctionDetail() {
     }
 
     fetchSubasta()
-  }, [id])
+  }, [slug])
 
   const getUrgencyColor = (urgency?: string) => {
     switch (urgency) {
@@ -124,17 +124,21 @@ export default function AuctionDetail() {
 
       <Row className="g-4 align-items-stretch">
         <Col lg={6}>
-          <Card className="glass-panel h-100 border-0 overflow-hidden">
-            <div className="auction-detail-visual d-flex align-items-center justify-content-center text-center p-5">
-              <div>
-                <span className="detail-visual-icon">🔧</span>
-                <h2 className="fw-bold text-white mt-3 mb-2">{subasta.nombre_refaccion}</h2>
-                <p className="text-white-50 mb-0">
-                  {subasta.marca_vehiculo} {subasta.modelo_vehiculo} {subasta.anio_vehiculo}
-                </p>
-              </div>
-            </div>
-          </Card>
+                {subasta.img_subastas && subasta.img_subastas.length > 0 ? (
+                        <img 
+                            src={subasta.img_subastas[0].url} 
+                            alt={subasta.nombre_refaccion} 
+                            className="img-fluid rounded mb-3 auction-card-img"
+                            style={{ height: '100%', width: '100%', objectFit: 'cover' }}
+                        />
+                    ) : (
+                        <div 
+                            className="d-flex align-items-center justify-content-center bg-dark rounded mb-3 text-white-50 border border-secondary"
+                            style={{ height: '180px', width: '100%' }}
+                        >
+                            <span className="small">Sin imagen disponible</span>
+                        </div>
+                    )}  
         </Col>
 
         <Col lg={6}>

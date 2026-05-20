@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Layout from "./components/Layout";
-import DashboardLayout from "./components/DashboardLayout";
+import Layout from "./layouts/mainwebsite/Layout";
+import DashboardLayout from "./layouts/dashboard/DashboardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./views/Home";
 import Contact from "./views/Contact";
 import Auctions from "./views/Auctions";
+import Search from "./views/Search";
 
 // Dashboard Views
 import MisSubastas from "./views/dashboard/MisSubastas";
@@ -23,7 +24,8 @@ function App() {
           <Route index element={<Home />} />
           <Route path="auctions" element={<Auctions />} />
           <Route path="contact" element={<Contact />} />
-          <Route path="auctions/:id" element={<AuctionDetail />} />
+          <Route path="search" element={<Search />} />
+          <Route path="auctions/:slug" element={<AuctionDetail />} />
         </Route>
 
         {/* Protected Dashboard Routes with Dashboard Layout */}

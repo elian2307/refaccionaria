@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Navbar, Nav, Container, Modal, Button, Form, Alert } from 'react-bootstrap';
-import axios from 'axios';
+import { Outlet } from 'react-router-dom';
+import { Modal, Button, Form, Alert } from 'react-bootstrap';
+
+import { api } from '../../services/api';
+import Header from './Header.tsx';
+import Footer from './Footer.tsx';
 
 export default function Layout() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState('');
@@ -25,7 +27,7 @@ export default function Layout() {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:8000/api/login', {
+      const response = await api.post('/login', {
         email,
         password
       });
@@ -44,47 +46,15 @@ export default function Layout() {
 
   return (
     <>
-      <Navbar expand="lg" fixed="top" className="navbar-custom" variant="dark">
-        <Container>
-          <Navbar.Brand as={Link} to="/">Subastas JOEE</Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="ms-auto align-items-center">
-              <Nav.Link as={Link} to="/" className={location.pathname === '/' ? 'active' : ''}>
-                Inicio
-              </Nav.Link>
-              <Nav.Link as={Link} to="/auctions" className={location.pathname === '/auctions' ? 'active' : ''}>
-                Subastas
-              </Nav.Link>
-              <Nav.Link as={Link} to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>
-                Contacto
-              </Nav.Link>
+      <Header buttonFunction={handleShow} />
 
-              {localStorage.getItem('token') ? (
-                <Link to="/dashboard" className="btn btn-primary-custom ms-lg-3 mt-3 mt-lg-0">
-                  Ir al Dashboard
-                </Link>
-              ) : (
-                <Button variant="primary" className="btn-primary-custom ms-lg-3 mt-3 mt-lg-0" onClick={handleShow}>
-                  Iniciar Sesión
-                </Button>
-              )}
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+        {/* Aqui va todo el contenido de los demas paginas*/}
 
-      <main className="main-content">
-        <Outlet context={{ handleShowLogin: handleShow }} />
-      </main>
+        <main className="main-content">
+          <Outlet context={{ handleShowLogin: handleShow }} />
+        </main>
 
-      <footer className="footer-custom text-center">
-        <Container>
-          <p className="mb-0 text-muted">
-            &copy; {new Date().getFullYear()} Subastas JOEE. Todos los derechos reservados.
-          </p>
-        </Container>
-      </footer>
+      <Footer />
 
       {/* Login Modal */}
       <Modal show={showLogin} onHide={handleClose} centered contentClassName="bg-dark text-white border-0 shadow-lg" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>

@@ -79,6 +79,50 @@ a:hover {
   transform: translateY(-0.2rem) scale(1.01);
 }
 
+.search-card {
+  background: var(--bg-darkest);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+}
+
+.search-card .card-body {
+  padding: 1.75rem 1.5rem;
+}
+
+.search-card .form-label {
+  color: var(--text-lessopacityxd);
+  font-weight: 500;
+}
+
+.form-select.form-control-custom {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  box-shadow: none;
+  min-height: 56px;
+  border-radius: 14px;
+  padding-left: 1.2rem;
+  padding-right: 1.2rem;
+}
+
+.form-select.form-control-custom:focus {
+  border-color: var(--primary);
+}
+
+.form-select.form-control-custom option {
+  color: var(--text-main);
+  background-color: #1b1a1a;
+}
+
+.reset-filters-btn {
+  min-height: 56px;
+  border-radius: 14px;
+  padding: 0.9rem 1.2rem;
+}
+
 /* Custom Buttons - matching dashboard .btn / .search */
 .btn-primary-custom {
   background: linear-gradient(to right, var(--primary), var(--secondary));
@@ -219,6 +263,47 @@ textarea.form-control-custom {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary); 
   cursor: pointer;
+}
+
+.search-input {
+  width: 100%;
+  min-width: 0;
+  max-width: 520px;
+}
+
+.search-panel {
+  max-width: 560px;
+}
+
+.search-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.filter-group {
+  min-width: 0;
+}
+
+.filter-group .form-select,
+.filter-group .form-control {
+  min-height: 54px;
+}
+
+.reset-filters-btn {
+  min-height: 54px;
+}
+
+@media (max-width: 991px) {
+  .search-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .search-filters {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Dashboard Specific Layout */
@@ -748,4 +833,14 @@ textarea.form-control-custom {
   border: none;
   text-align: left;
   cursor: pointer;
+}
+
+
+.inlinelogo{
+  width: 2rem;
+  height: 2rem;
+}
+
+.makemebig:hover{
+  transform: scale(1.05);
 }
