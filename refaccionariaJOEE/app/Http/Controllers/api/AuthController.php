@@ -15,14 +15,25 @@ class AuthController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|max:255',
+            'apellidos' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'rol' => 'required|in:vendedor,comprador',
+            'telefono' => 'required|string|max:20',
+            'tipo_usuario' => 'required|in:taller,refaccionaria,flotilla,usuario',
         ]);
 
         $user = User::create([
             'nombre' => $request->nombre,
+            'apellidos' => $request->apellidos,
             'email' => $request->email,
             'password' => $request->password,
+            'rol' => $request->rol,
+            'telefono' => $request->telefono,
+            'reputacion' => 5.00,
+            'fecha_registro' => now()->toDateString(),
+            'puntos_gamificacion' => 0,
+            'tipo_usuario' => $request->tipo_usuario,
         ]);
 
         try {

@@ -1,5 +1,6 @@
 import { Container, Row, Col, Card, Badge } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
+import { getToken } from '../services/auth';
 
 const categories = [
     'Motores',
@@ -33,6 +34,21 @@ export default function Home() {
     //DECLARAR LO DE LA DIRECCION DE LA API DE LARAVEL
     //const apiUrl = import.meta.env.VITE_API_URL; 
 
+    const navigate = useNavigate();
+    const context = useOutletContext<{ handleShowLogin?: () => void }>();
+    const handleShowLogin = context?.handleShowLogin;
+
+    const handleAuctionClick = () => {
+        const token = getToken();
+        if (!token) {
+            if (handleShowLogin) {
+                handleShowLogin();
+            }
+        } else {
+            navigate('/dashboard/subastas');
+        }
+    }; 
+
 
     return (
         <div className="home-view">
@@ -55,9 +71,9 @@ export default function Home() {
                             </p>
 
                             <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
-                                <Link to="/dashboard/subastas" className="btn btn-primary-custom btn-lg">
+                                <button onClick={handleAuctionClick} className="btn btn-primary-custom btn-lg" style={{ border: 'none', cursor: 'pointer' }}>
                                     Subastar una Refacción
-                                </Link>
+                                </button>
 
                                 <Link to="/auctions" className="btn btn-home-secondary btn-lg">
                                     Ver Subastas Activas
