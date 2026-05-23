@@ -11,6 +11,7 @@ use App\Http\Controllers\api\ResenasController;
 use App\Http\Controllers\api\ImgSubastasController;
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\api\GamificacionController;
+use App\Http\Controllers\api\PaypalController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -32,6 +33,10 @@ Route::middleware('jwt')->group(function () {
 
     // Flujo cliente/comprador: ver sus pujas realizadas
     Route::get('/mis-ofertas', [OfertasController::class, 'misOfertas']);
+
+    // PayPal: crear orden y capturar pago de un pedido aceptado
+    Route::post('/paypal/pedido/{pedido}/create-order', [PaypalController::class, 'crearOrden']);
+    Route::post('/paypal/pedido/{pedido}/capture-order', [PaypalController::class, 'capturarOrden']);
 
     Route::resource('users', UsersController::class);
     Route::resource('direccion', DireccionesController::class);

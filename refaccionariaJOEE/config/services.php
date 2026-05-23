@@ -7,10 +7,8 @@ return [
     | Third Party Services
     |--------------------------------------------------------------------------
     |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
+    | This file is for storing the credentials for third party services
+    | such as Mailgun, Postmark, AWS, PayPal and more.
     |
     */
 
@@ -33,6 +31,15 @@ return [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
+    ],
+
+    'paypal' => [
+        'mode' => env('PAYPAL_MODE', 'sandbox'),
+        'sandbox_client_id' => env('PAYPAL_SANDBOX_CLIENT_ID'),
+        'sandbox_client_secret' => env('PAYPAL_SANDBOX_CLIENT_SECRET'),
+        'live_client_id' => env('PAYPAL_LIVE_CLIENT_ID'),
+        'live_client_secret' => env('PAYPAL_LIVE_CLIENT_SECRET'),
+        'currency' => env('PAYPAL_CURRENCY', 'MXN'),
     ],
 
 ];

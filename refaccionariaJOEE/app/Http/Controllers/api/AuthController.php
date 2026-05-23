@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RegistroUsuarioMail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -36,6 +39,8 @@ class AuthController extends Controller
             'tipo_usuario' => $request->tipo_usuario,
         ]);
 
+        $this->enviarCorreoSeguro($user->email, new RegistroUsuarioMail($user));
+
         try {
             $token = JWTAuth::fromUser($user);
         } catch (JWTException $e) {
@@ -53,75 +58,75 @@ class AuthController extends Controller
     }
 
     public function login(Request $request)
-        {
-            $credentials = $request->only('email', 'password');
+    {
+        $credentials = $request->only('email', 'password');
 
-            try {
-                if (!$token = auth('api')->attempt($credentials)) {
-                    return response()->json([
-                        'success' => false,
-                        'msg' => 'Invalid credentials'
-                    ], 401);
-                }
-            } catch (JWTException $e) {
+        try {
+            if (!$token = auth('api')->attempt($credentials)) {
                 return response()->json([
                     'success' => false,
-                    'msg' => 'Could not create token'
-                ], 500);
+                    'msg' => 'Invalid credentials'
+                ], 401);
             }
+        } catch (JWTException $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Could not create token'
+            ], 500);
+        }
 
-            $user = JWTAuth::setToken($token)->toUser();
+        $user = JWTAuth::setToken($token)->toUser();
+
+        return response()->json([
+            'success' => true,
+            'token' => $token,
+            'user' => $user,
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
+        ], 200);
+    }
+
+    public function logout()
+    {
+        try {
+            auth('api')->logout();
 
             return response()->json([
                 'success' => true,
-                'token' => $token,
-                'user' => $user,
-                'expires_in' => auth('api')->factory()->getTTL() * 60,
+                'msg' => 'Successfully logged out'
             ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Failed to logout',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-    public function logout()
-        {
-            try {
-                auth('api')->logout();
-
-                return response()->json([
-                    'success' => true,
-                    'msg' => 'Successfully logged out'
-                ], 200);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'success' => false,
-                    'msg' => 'Failed to logout',
-                    'error' => $e->getMessage()
-                ], 500);
-            }
-        }
+    }
 
     public function getUser()
-        {
-            try {
-                $user = auth('api')->user();
+    {
+        try {
+            $user = auth('api')->user();
 
-                if (!$user) {
-                    return response()->json([
-                        'success' => false,
-                        'msg' => 'User not found'
-                    ], 404);
-                }
-
-                return response()->json([
-                    'success' => true,
-                    'user' => $user
-                ], 200);
-            } catch (\Exception $e) {
+            if (!$user) {
                 return response()->json([
                     'success' => false,
-                    'msg' => 'Failed to fetch user profile',
-                    'error' => $e->getMessage()
-                ], 500);
+                    'msg' => 'User not found'
+                ], 404);
             }
+
+            return response()->json([
+                'success' => true,
+                'user' => $user
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Failed to fetch user profile',
+                'error' => $e->getMessage()
+            ], 500);
         }
+    }
 
     public function updateUser(Request $request)
     {
@@ -151,6 +156,15 @@ class AuthController extends Controller
                 'success' => false,
                 'msg' => 'Failed to update user'
             ], 500);
+        }
+    }
+
+    private function enviarCorreoSeguro(string $email, $mailable): void
+    {
+        try {
+            Mail::to($email)->send($mailable);
+        } catch (Throwable $e) {
+            report($e);
         }
     }
 }

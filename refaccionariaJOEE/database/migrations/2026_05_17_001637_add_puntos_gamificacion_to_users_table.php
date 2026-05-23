@@ -8,17 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->unsignedInteger('puntos_gamificacion')
-                ->default(0)
-                ->after('reputacion');
-        });
+        if (!Schema::hasColumn('users', 'puntos_gamificacion')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->integer('puntos_gamificacion')->default(0)->after('is_active');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('puntos_gamificacion');
-        });
+        if (Schema::hasColumn('users', 'puntos_gamificacion')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('puntos_gamificacion');
+            });
+        }
     }
 };

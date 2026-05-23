@@ -5,6 +5,9 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\pedido;
+use App\Mail\EnvioActualizadoMail;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class PedidosController extends Controller
 {
@@ -21,6 +24,7 @@ class PedidosController extends Controller
 
         $query = pedido::with([
             'subasta',
+            'subasta.user:id,nombre,apellidos,email,rol',
             'oferta',
             'oferta.proveedor:id,nombre,apellidos,email,rol'
         ])->orderBy('created_at', 'desc');
@@ -77,8 +81,8 @@ class PedidosController extends Controller
             'oferta_id' => 'required|exists:ofertas,id',
             'monto_total' => 'required|numeric',
             'monto_comision' => 'required|numeric',
-            'estado_pago' => 'required|string|max:255',
-            'estado_envio' => 'required|string|max:255',
+            'estado_pago' => 'required|in:pendiente,pagado,reembolsado',
+            'estado_envio' => 'required|in:pendiente,enviado,entregado',
             'numero_rastreo' => 'nullable|string|max:255',
             'fecha_pedido' => 'required|date',
         ]);
@@ -107,6 +111,7 @@ class PedidosController extends Controller
 
         $pedido = pedido::with([
             'subasta',
+            'subasta.user:id,nombre,apellidos,email,rol',
             'oferta',
             'oferta.proveedor:id,nombre,apellidos,email,rol'
         ])->find($id);
@@ -175,7 +180,7 @@ class PedidosController extends Controller
             ], 401);
         }
 
-        $pedido = pedido::with(['subasta', 'oferta'])->find($id);
+        $pedido = pedido::with(['subasta.user', 'oferta.proveedor'])->find($id);
 
         if (!$pedido) {
             return response([
@@ -187,7 +192,7 @@ class PedidosController extends Controller
         if (!in_array($user->rol, ['vendedor', 'admin'])) {
             return response([
                 'success' => false,
-                'msg' => 'Solo el vendedor puede actualizar el pedido'
+                'msg' => 'Solo el vendedor puede actualizar el envío del pedido'
             ], 403);
         }
 
@@ -203,16 +208,33 @@ class PedidosController extends Controller
         }
 
         $validateData = $request->validate([
-            'estado_pago' => 'sometimes|required|in:pendiente,pagado,reembolsado',
             'estado_envio' => 'sometimes|required|in:pendiente,enviado,entregado',
             'numero_rastreo' => 'nullable|string|max:255',
         ]);
+
+        if (isset($validateData['estado_envio']) && $validateData['estado_envio'] !== 'pendiente' && $pedido->estado_pago !== 'pagado') {
+            return response([
+                'success' => false,
+                'msg' => 'No puedes marcar el envío como enviado o entregado hasta que el pago esté confirmado por PayPal'
+            ], 422);
+        }
 
         if (array_key_exists('numero_rastreo', $validateData) && !$validateData['numero_rastreo']) {
             $validateData['numero_rastreo'] = 'Pendiente';
         }
 
+        $estadoAnterior = $pedido->estado_envio;
+        $rastreoAnterior = $pedido->numero_rastreo;
+
         $pedido->update($validateData);
+        $pedido->refresh();
+        $pedido->load(['subasta.user', 'oferta.proveedor']);
+
+        $cambioEnvio = $estadoAnterior !== $pedido->estado_envio || $rastreoAnterior !== $pedido->numero_rastreo;
+
+        if ($cambioEnvio && $pedido->oferta && $pedido->oferta->proveedor && $pedido->oferta->proveedor->email) {
+            $this->enviarCorreoSeguro($pedido->oferta->proveedor->email, new EnvioActualizadoMail($pedido));
+        }
 
         return response([
             'success' => true,
@@ -247,5 +269,14 @@ class PedidosController extends Controller
             'success' => true,
             'msg' => 'Pedido deleted successfully'
         ], 200);
+    }
+
+    private function enviarCorreoSeguro(string $email, $mailable): void
+    {
+        try {
+            Mail::to($email)->send($mailable);
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 }

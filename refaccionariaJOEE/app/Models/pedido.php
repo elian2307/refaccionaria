@@ -18,6 +18,11 @@ class pedido extends Model
         'estado_envio',
         'numero_rastreo',
         'fecha_pedido',
+        'paypal_order_id',
+        'paypal_capture_id',
+        'paypal_status',
+        'paypal_payer_email',
+        'fecha_pago',
     ];
 
     public function subasta()

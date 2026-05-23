@@ -25,6 +25,11 @@ class subasta extends Model
         'slug'
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function img_subastas()
     {
         return $this->hasMany(img_subasta::class, 'subasta_id');

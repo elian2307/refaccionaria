@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { apiAuth } from '../../services/api';
@@ -43,8 +43,126 @@ interface Pedido {
     numero_rastreo: string;
     fecha_pedido: string;
     created_at: string;
+    paypal_order_id?: string | null;
+    paypal_capture_id?: string | null;
+    paypal_status?: string | null;
+    paypal_payer_email?: string | null;
+    fecha_pago?: string | null;
     subasta?: Subasta;
     oferta?: Oferta;
+}
+
+declare global {
+    interface Window {
+        paypal?: any;
+    }
+}
+
+let paypalScriptPromise: Promise<void> | null = null;
+
+const cargarScriptPaypal = () => {
+    const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+    const currency = import.meta.env.VITE_PAYPAL_CURRENCY || 'MXN';
+
+    if (!clientId) {
+        return Promise.reject(new Error('Falta VITE_PAYPAL_CLIENT_ID en el .env de React'));
+    }
+
+    if (window.paypal) {
+        return Promise.resolve();
+    }
+
+    if (paypalScriptPromise) {
+        return paypalScriptPromise;
+    }
+
+    paypalScriptPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}&intent=capture`;
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('No se pudo cargar el SDK de PayPal'));
+        document.body.appendChild(script);
+    });
+
+    return paypalScriptPromise;
+};
+
+function PaypalPedidoButton({
+    pedido,
+    onSuccess,
+    onError,
+}: {
+    pedido: Pedido;
+    onSuccess: (mensaje: string) => void;
+    onError: (mensaje: string) => void;
+}) {
+    const paypalContainerRef = useRef<HTMLDivElement | null>(null);
+    const botonesRenderizadosRef = useRef(false);
+
+    useEffect(() => {
+        let cancelado = false;
+
+        const renderizarBoton = async () => {
+            try {
+                await cargarScriptPaypal();
+
+                if (cancelado || !paypalContainerRef.current || botonesRenderizadosRef.current) {
+                    return;
+                }
+
+                botonesRenderizadosRef.current = true;
+                paypalContainerRef.current.innerHTML = '';
+
+                window.paypal.Buttons({
+                    style: {
+                        layout: 'vertical',
+                        color: 'gold',
+                        shape: 'rect',
+                        label: 'pay',
+                    },
+                    createOrder: async () => {
+                        const response = await apiAuth.post(`/paypal/pedido/${pedido.id}/create-order`);
+                        const orderId = response.data?.paypal_order_id;
+
+                        if (!orderId) {
+                            throw new Error('Laravel no regresó el ID de la orden de PayPal');
+                        }
+
+                        return orderId;
+                    },
+                    onApprove: async (data: any) => {
+                        await apiAuth.post(`/paypal/pedido/${pedido.id}/capture-order`, {
+                            paypal_order_id: data.orderID,
+                        });
+
+                        onSuccess('Pago confirmado correctamente con PayPal.');
+                    },
+                    onCancel: () => {
+                        onError('El pago fue cancelado antes de completarse.');
+                    },
+                    onError: (err: any) => {
+                        console.error('PayPal error:', err);
+                        onError('Ocurrió un error al procesar el pago con PayPal.');
+                    },
+                }).render(paypalContainerRef.current);
+            } catch (err: any) {
+                onError(err.message || 'No se pudo iniciar PayPal.');
+            }
+        };
+
+        renderizarBoton();
+
+        return () => {
+            cancelado = true;
+
+            if (paypalContainerRef.current) {
+                paypalContainerRef.current.innerHTML = '';
+            }
+        };
+    }, [pedido.id, onError, onSuccess]);
+
+    return <div ref={paypalContainerRef} />;
 }
 
 export default function MisPedidos() {
@@ -55,7 +173,22 @@ export default function MisPedidos() {
     const [actualizandoPedidoId, setActualizandoPedidoId] = useState<number | null>(null);
 
     const user = getUser();
-    const puedeActualizar = user?.rol === 'vendedor' || user?.rol === 'admin';
+
+const puedeActualizarEnvio = user?.rol === 'vendedor' || user?.rol === 'admin';
+
+const puedePagarPedido = (pedido: Pedido) => {
+    const userId = Number(user?.id);
+    const rol = String(user?.rol || '').toLowerCase();
+
+    if (rol === 'admin') {
+        return pedido.estado_pago === 'pendiente';
+    }
+
+    return (
+        pedido.estado_pago === 'pendiente' &&
+        Number(pedido.oferta?.proveedor_id) === userId
+    );
+};
 
     const cargarPedidos = async () => {
         try {
@@ -100,7 +233,6 @@ export default function MisPedidos() {
             setSuccess(null);
 
             await apiAuth.put(`/pedido/${pedido.id}`, {
-                estado_pago: pedido.estado_pago,
                 estado_envio: pedido.estado_envio,
                 numero_rastreo: pedido.numero_rastreo || 'Pendiente',
             });
@@ -112,6 +244,17 @@ export default function MisPedidos() {
         } finally {
             setActualizandoPedidoId(null);
         }
+    };
+
+    const pagoExitoso = (mensaje: string) => {
+        setSuccess(mensaje);
+        setError(null);
+        cargarPedidos();
+    };
+
+    const pagoConError = (mensaje: string) => {
+        setError(mensaje);
+        setSuccess(null);
     };
 
     const getEnvioBadge = (estado: string) => {
@@ -158,7 +301,7 @@ export default function MisPedidos() {
         });
     };
 
-    const formatFecha = (value?: string) => {
+    const formatFecha = (value?: string | null) => {
         if (!value) return 'No disponible';
 
         const date = new Date(value);
@@ -269,8 +412,14 @@ export default function MisPedidos() {
                                         </Badge>
                                     </div>
 
-                                    <small className="text-white-50 d-block">Fecha</small>
+                                    <small className="text-white-50 d-block">Fecha de pedido</small>
                                     <strong>{formatFecha(pedido.fecha_pedido || pedido.created_at)}</strong>
+
+                                    {pedido.fecha_pago && (
+                                        <p className="text-white-50 small mb-0 mt-1">
+                                            Pagado: {formatFecha(pedido.fecha_pago)}
+                                        </p>
+                                    )}
                                 </Col>
                             </Row>
 
@@ -280,7 +429,7 @@ export default function MisPedidos() {
                                 <Col md={3}>
                                     <small className="text-white-50 d-block mb-1">Número de rastreo</small>
 
-                                    {puedeActualizar ? (
+                                    {puedeActualizarEnvio ? (
                                         <Form.Control
                                             type="text"
                                             value={pedido.numero_rastreo || ''}
@@ -295,26 +444,19 @@ export default function MisPedidos() {
 
                                 <Col md={3}>
                                     <small className="text-white-50 d-block mb-1">Estado de pago</small>
+                                    <strong>{formatEstado(pedido.estado_pago)}</strong>
 
-                                    {puedeActualizar ? (
-                                        <Form.Select
-                                            value={pedido.estado_pago}
-                                            onChange={(e) => actualizarCampoPedido(pedido.id, 'estado_pago', e.target.value)}
-                                            className="form-control-custom"
-                                        >
-                                            <option value="pendiente">Pendiente</option>
-                                            <option value="pagado">Pagado</option>
-                                            <option value="reembolsado">Reembolsado</option>
-                                        </Form.Select>
-                                    ) : (
-                                        <strong>{formatEstado(pedido.estado_pago)}</strong>
+                                    {pedido.paypal_order_id && (
+                                        <p className="text-white-50 small mb-0 mt-1">
+                                            PayPal: {pedido.paypal_order_id}
+                                        </p>
                                     )}
                                 </Col>
 
                                 <Col md={3}>
                                     <small className="text-white-50 d-block mb-1">Estado de envío</small>
 
-                                    {puedeActualizar ? (
+                                    {puedeActualizarEnvio ? (
                                         <Form.Select
                                             value={pedido.estado_envio}
                                             onChange={(e) => actualizarCampoPedido(pedido.id, 'estado_envio', e.target.value)}
@@ -329,7 +471,7 @@ export default function MisPedidos() {
                                     )}
                                 </Col>
 
-                                <Col md={3} className="d-flex gap-2">
+                                <Col md={3} className="d-flex gap-2 flex-column">
                                     {pedido.subasta?.slug && (
                                         <Link
                                             to={`/auctions/${pedido.subasta.slug}`}
@@ -339,14 +481,24 @@ export default function MisPedidos() {
                                         </Link>
                                     )}
 
-                                    {puedeActualizar && (
+                                    {puedeActualizarEnvio && (
                                         <Button
                                             className="btn-primary-custom w-100"
                                             onClick={() => guardarCambiosPedido(pedido)}
                                             disabled={actualizandoPedidoId === pedido.id}
                                         >
-                                            {actualizandoPedidoId === pedido.id ? 'Guardando...' : 'Guardar'}
+                                            {actualizandoPedidoId === pedido.id ? 'Guardando...' : 'Guardar envío'}
                                         </Button>
+                                    )}
+
+                                    {puedePagarPedido(pedido) && (
+                                        <div className="bg-white rounded p-2">
+                                            <PaypalPedidoButton
+                                                pedido={pedido}
+                                                onSuccess={pagoExitoso}
+                                                onError={pagoConError}
+                                            />
+                                        </div>
                                     )}
                                 </Col>
                             </Row>
