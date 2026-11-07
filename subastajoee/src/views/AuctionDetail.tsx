@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useOutletContext } from 'react-router-dom'
-import { Alert, Badge, Button, Card, Col, Container, Row, Spinner } from 'react-bootstrap'
+import { Alert, Badge, Button, Card, Col, Container, Row, Spinner, Modal, Form, InputGroup } from 'react-bootstrap'
 import axios from 'axios'
 
 import type { Subasta } from '../interfaces/Subasta';
@@ -11,6 +11,18 @@ export default function AuctionDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
+  // Bid Modal State
+  const [showBidModal, setShowBidModal] = useState(false)
+  const [bidLoading, setBidLoading] = useState(false)
+  const [bidError, setBidError] = useState('')
+  const [bidSuccess, setBidSuccess] = useState(false)
+  const [bidData, setBidData] = useState({
+    precio_ofertado: '',
+    dias_entrega: '',
+    condicion_pieza: 'Nueva',
+    meses_garantia: ''
+  })
+
   // Use context from Layout.tsx to open login modal
   const context = useOutletContext<{ handleShowLogin?: () => void }>()
   const handleShowLogin = context?.handleShowLogin
@@ -90,8 +102,54 @@ export default function AuctionDetail() {
       handleShowLogin()
       return
     }
-    // Aquí iría la lógica para abrir el modal o formulario de oferta
-    console.log("Abrir formulario de oferta...")
+    setShowBidModal(true)
+  }
+
+  const handleBidSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setBidLoading(true)
+    setBidError('')
+
+    try {
+      const token = localStorage.getItem('token')
+      const userStr = localStorage.getItem('user')
+      if (!userStr || !token) throw new Error('No estás autenticado')
+
+      const user = JSON.parse(userStr)
+
+      const payload = {
+        subasta_id: id,
+        proveedor_id: user.id,
+        precio_ofertado: Number(bidData.precio_ofertado),
+        dias_entrega: Number(bidData.dias_entrega),
+        condicion_pieza: bidData.condicion_pieza,
+        meses_garantia: bidData.meses_garantia ? Number(bidData.meses_garantia) : null,
+        fecha_oferta: new Date().toISOString().split('T')[0],
+      }
+
+      const response = await axios.post('http://localhost:8000/api/oferta', payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        setBidSuccess(true)
+        setTimeout(() => {
+          setShowBidModal(false)
+          setBidSuccess(false)
+          // Reset form
+          setBidData({
+            precio_ofertado: '',
+            dias_entrega: '',
+            condicion_pieza: 'Nueva',
+            meses_garantia: ''
+          })
+        }, 2000)
+      }
+    } catch (err: any) {
+      setBidError(err.response?.data?.msg || err.response?.data?.message || 'Error al enviar la oferta.')
+    } finally {
+      setBidLoading(false)
+    }
   }
 
   if (loading) {
@@ -225,6 +283,99 @@ export default function AuctionDetail() {
           </Card>
         </Col>
       </Row>
+
+      {/* Bid Modal */}
+      <Modal show={showBidModal} onHide={() => !bidLoading && setShowBidModal(false)} centered contentClassName="bg-dark text-white border-0 shadow-lg" backdropClassName="modal-backdrop-custom">
+        <Modal.Header closeButton closeVariant="white" className="border-0 pb-0 px-4 pt-4">
+          <Modal.Title className="fw-bold fs-3">Hacer Oferta</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="px-4 pb-4 pt-2">
+          <p className="text-white-50 mb-4">Ingresa los detalles de tu oferta para esta refacción.</p>
+
+          {bidError && <Alert variant="danger" className="rounded-4 border-0">{bidError}</Alert>}
+          {bidSuccess && <Alert variant="success" className="rounded-4 border-0">¡Oferta enviada con éxito!</Alert>}
+
+          <Form onSubmit={handleBidSubmit}>
+            <Row className="g-3 mb-3">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="text-white-50 ms-2 mb-2 small fw-semibold text-uppercase tracking-wide">Precio ($)</Form.Label>
+                  <InputGroup>
+                    <InputGroup.Text className="bg-dark text-white border-secondary">$</InputGroup.Text>
+                    <Form.Control
+                      type="number"
+                      placeholder="0.00"
+                      value={bidData.precio_ofertado}
+                      onChange={(e) => setBidData({...bidData, precio_ofertado: e.target.value})}
+                      required
+                      min="1"
+                      step="0.01"
+                      className="form-control-custom rounded-end"
+                    />
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="text-white-50 ms-2 mb-2 small fw-semibold text-uppercase tracking-wide">Días de entrega</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="Ej. 3"
+                    value={bidData.dias_entrega}
+                    onChange={(e) => setBidData({...bidData, dias_entrega: e.target.value})}
+                    required
+                    min="1"
+                    className="form-control-custom"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row className="g-3 mb-4">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="text-white-50 ms-2 mb-2 small fw-semibold text-uppercase tracking-wide">Condición</Form.Label>
+                  <Form.Select
+                    value={bidData.condicion_pieza}
+                    onChange={(e) => setBidData({...bidData, condicion_pieza: e.target.value})}
+                    className="form-control-custom"
+                    style={{ appearance: 'auto' }}
+                  >
+                    <option value="Nueva">Nueva</option>
+                    <option value="Usada">Usada</option>
+                    <option value="Reconstruida">Reconstruida</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="text-white-50 ms-2 mb-2 small fw-semibold text-uppercase tracking-wide">Garantía (Meses)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="Opcional"
+                    value={bidData.meses_garantia}
+                    onChange={(e) => setBidData({...bidData, meses_garantia: e.target.value})}
+                    min="0"
+                    className="form-control-custom"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Button variant="primary" type="submit" className="btn-primary-custom w-100 py-3 mt-2 fs-5" disabled={bidLoading || bidSuccess}>
+              {bidLoading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Enviando...
+                </>
+              ) : 'Enviar Oferta'}
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
     </Container>
   )
 }
